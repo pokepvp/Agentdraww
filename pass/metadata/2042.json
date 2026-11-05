@@ -1,0 +1,14 @@
+{
+  "name": "AgentDraw Pass #2042",
+  "image": "https://agentdraw.click/pass/metadata/images/2042.svg",
+  "attributes": [
+    {
+      "trait_type": "Lane",
+      "value": "Player"
+    },
+    {
+      "trait_type": "Serial",
+      "value": 2042
+    }
+  ]
+}
