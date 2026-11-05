@@ -13,7 +13,7 @@ const DRAW_CONFIG = {
   chainId: 56,                  // BNB Smart Chain Mainnet
   chainHex: "0x38",
   agentIdAddress: "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F", // Binance .ai Agent ID NFT (SPACE ID)
-  xUrl: "" // official X — not set yet
+  xUrl: "https://x.com/AgentDrawBNB" // official X — @AgentDrawBNB (created by the owner 2026-11-05)
 };
 const CONTRACT = DRAW_CONFIG.contractAddress;
 const AGENT_ID = DRAW_CONFIG.agentIdAddress;
@@ -549,7 +549,7 @@ function paintFooter() {
   }
   if (DRAW_CONFIG.xUrl) {
     const x = $("footerX");
-    x.href = DRAW_CONFIG.xUrl; x.textContent = "X — @AgentDraw"; x.removeAttribute("aria-disabled");
+    x.href = DRAW_CONFIG.xUrl; x.textContent = "X — @AgentDrawBNB"; x.removeAttribute("aria-disabled");
   }
 }
 let refreshBusy = false;

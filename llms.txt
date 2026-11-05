@@ -50,6 +50,7 @@ pool per UTC day, and one winning ticket per day is drawn on-chain.
   (credited instantly at entry)
 - maxTicketsPerTx: 20
 - settle: permissionless settleDay() after 00:00 UTC, one day per call
+- official X: https://x.com/AgentDrawBNB (@AgentDrawBNB)
 
 ## Agent prompts (paste-ready; fill the real contract address after launch)
 
