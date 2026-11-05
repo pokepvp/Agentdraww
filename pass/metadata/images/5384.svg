@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+<defs>
+<linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#8A6D1F"/>
+<stop offset="0.28" stop-color="#D4AF37"/>
+<stop offset="0.5" stop-color="#F6E27A"/>
+<stop offset="0.72" stop-color="#D4AF37"/>
+<stop offset="1" stop-color="#8A6D1F"/>
+</linearGradient>
+<radialGradient id="stock" cx="0.5" cy="0.42" r="0.85">
+<stop offset="0" stop-color="#211C13"/>
+<stop offset="1" stop-color="#16130E"/>
+</radialGradient>
+</defs>
+<rect x="0" y="0" width="1000" height="1000" fill="url(#stock)"/>
+<!-- gold foil double frame: a certificate, not a ticket -->
+<rect x="36" y="36" width="928" height="928" fill="none" stroke="url(#foil)" stroke-width="10"/>
+<rect x="64" y="64" width="872" height="872" fill="none" stroke="url(#foil)" stroke-width="2.5"/>
+<rect x="80" y="80" width="840" height="840" fill="none" stroke="url(#foil)" stroke-width="1" opacity="0.55"/>
+<!-- corner ornaments -->
+<g fill="url(#foil)">
+<rect x="36" y="36" width="46" height="10"/><rect x="36" y="36" width="10" height="46"/>
+<rect x="918" y="36" width="46" height="10"/><rect x="954" y="36" width="10" height="46"/>
+<rect x="36" y="954" width="46" height="10"/><rect x="36" y="918" width="10" height="46"/>
+<rect x="918" y="954" width="46" height="10"/><rect x="954" y="918" width="10" height="46"/>
+</g>
+<!-- heading -->
+<text x="500" y="196" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="700" font-size="33" letter-spacing="14" fill="url(#foil)">AGENTDRAW PASS</text>
+<line x1="300" y1="232" x2="700" y2="232" stroke="url(#foil)" stroke-width="2"/>
+<!-- the wax seal: signal red, scalloped, centered -->
+<path d="M500.0,294.0 L516.7,315.1 L538.3,299.0 L549.0,323.7 L574.0,313.8 L577.9,340.5 L604.7,337.3 L601.5,364.1 L628.2,368.0 L618.3,393.0 L643.0,403.7 L626.9,425.3 L648.0,442.0 L626.9,458.7 L643.0,480.3 L618.3,491.0 L628.2,516.0 L601.5,519.9 L604.7,546.7 L577.9,543.5 L574.0,570.2 L549.0,560.3 L538.3,585.0 L516.7,568.9 L500.0,590.0 L483.3,568.9 L461.7,585.0 L451.0,560.3 L426.0,570.2 L422.1,543.5 L395.3,546.7 L398.5,519.9 L371.8,516.0 L381.7,491.0 L357.0,480.3 L373.1,458.7 L352.0,442.0 L373.1,425.3 L357.0,403.7 L381.7,393.0 L371.8,368.0 L398.5,364.1 L395.3,337.3 L422.1,340.5 L426.0,313.8 L451.0,323.7 L461.7,299.0 L483.3,315.1 Z" fill="#FF4A1C"/>
+<path d="M500.0,314.0 L514.6,331.0 L533.1,318.4 L542.9,338.5 L564.0,331.1 L568.2,353.1 L590.5,351.5 L588.9,373.8 L610.9,378.0 L603.5,399.1 L623.6,408.9 L611.0,427.4 L628.0,442.0 L611.0,456.6 L623.6,475.1 L603.5,484.9 L610.9,506.0 L588.9,510.2 L590.5,532.5 L568.2,530.9 L564.0,552.9 L542.9,545.5 L533.1,565.6 L514.6,553.0 L500.0,570.0 L485.4,553.0 L466.9,565.6 L457.1,545.5 L436.0,552.9 L431.8,530.9 L409.5,532.5 L411.1,510.2 L389.1,506.0 L396.5,484.9 L376.4,475.1 L389.0,456.6 L372.0,442.0 L389.0,427.4 L376.4,408.9 L396.5,399.1 L389.1,378.0 L411.1,373.8 L409.5,351.5 L431.8,353.1 L436.0,331.1 L457.1,338.5 L466.9,318.4 L485.4,331.0 Z" fill="#C9330E"/>
+<circle cx="500" cy="442" r="96" fill="none" stroke="#F4F1EA" stroke-width="3" opacity="0.85"/>
+<text x="500" y="486" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="104" letter-spacing="2" fill="#F4F1EA">AD</text>
+<!-- gold FOUNDER wordmark -->
+<text x="500" y="712" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="96" letter-spacing="16" fill="url(#foil)">FOUNDER</text>
+<text x="500" y="768" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="24" letter-spacing="3" fill="url(#foil)">THIS MINT PUT 0.0005 BNB INTO THE CHECK-IN POOL</text>
+<!-- gold serial -->
+<text x="500" y="864" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="64" fill="url(#foil)">#5384</text>
+<text x="500" y="916" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="21" letter-spacing="2" fill="#D4AF37" opacity="0.8">BNB CHAIN &#183; AGENT ID HOLDERS ONLY &#183; agentdraw.click</text>
+</svg>
