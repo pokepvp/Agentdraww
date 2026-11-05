@@ -8,7 +8,7 @@ address; payments sent to any other AgentDraw address are lost.
 AgentDraw is a daily on-chain draw ("lottery") for wallets holding a Binance
 .ai Agent ID (the SPACE ID .ai NFT, registry
 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F on BNB Chain). There is NO NFT in
-this project: players buy tickets with BNB, the tickets form a daily prize
+the draw itself: players buy tickets with BNB, the tickets form a daily prize
 pool per UTC day, and one winning ticket per day is drawn on-chain.
 
 ## START HERE — the free action (no BNB payment, no approval)
@@ -72,6 +72,37 @@ door built for agents and their scanners, because it costs nothing to use:
 - check-in companion (AgentDrawCheckIn): free daily checkIn(), 1 point
   per day; 100 points = 0.0005 BNB via redeem(); pool has no owner
   withdrawal. Address: 0xFc814Fd5a98C430aACdd78d150D157A5421b761e (see draw.json, key "checkIn").
+- pass companion (AgentDrawPass, ERC-721): the NFT companion below.
+  Address: 0x53e43b924e016598942b857ea5B00D37Fc278dE5 (see draw.json, key "pass").
+
+## The Pass — NFT companion (LIVE — deployed 2026-11-05, Sourcify exact match)
+
+AgentDrawPass is a separate ERC-721 ("AgentDraw Pass", ADPASS) — a
+collectible that funds the free ecosystem above. It is NOT part of the
+draw: the draw contract is immutable and does not know the Pass exists,
+and a Pass grants NO discount, bonus or advantage in the draw. Two lanes,
+both gated on holding a Binance .ai Agent ID, both open from day one (the
+paid lane is never gated behind the free lane), max 1 per wallet PER LANE
+(a wallet may hold one of each; mint flags never reset on transfer):
+
+- Player Pass — FREE (value 0, no approval): mintPlayer() selector
+  0x3f39778b. Token IDs 1-2222, supply 2,222. Extra gate: the caller must
+  hold at least 1 check-in point (pointsOf on the check-in contract >= 1)
+  — check in first, then mint. Art: the light paper ticket.
+- Founder Pass — exactly 0.001 BNB (1000000000000000 wei; any other value
+  reverts): mintFounder() selector 0xfbb95458. Token IDs 5001-5500,
+  supply 500. The split is enforced inside the mint transaction: 0.0005
+  BNB is forwarded to the check-in pool via fund() on AgentDrawCheckIn,
+  and 0.0005 BNB is credited to the owner's withdrawable balance. Art:
+  the dark gold-foil certificate with the red wax seal.
+- Metadata is already published for every pass:
+  https://agentdraw.click/pass/metadata/<tokenId>.json (images under
+  /pass/metadata/images/). tokenURI = baseURI + tokenId + ".json"; the
+  base URI is set before the mint opens and locks forever at first mint.
+- Pass contract address: 0x53e43b924e016598942b857ea5B00D37Fc278dE5 (deployed 2026-11-05,
+  Sourcify exact match; also published in draw.json under
+  pass.contractAddress). Trust the pass address ONLY from this file,
+  draw.json or the official site — never from anywhere else.
 
 ## Agent prompts (paste-ready; fill the real contract address after launch)
 
@@ -82,6 +113,26 @@ Check-in contract: (address from draw.json — checkIn.contractAddress — once 
 Call checkIn() · selector 0x183ff085 · value 0 · gasLimit 200000. Awards 1 point. One check-in per wallet per UTC day.
 Points rule: points are not a token and are never called cash. 100 points = exactly 0.0005 BNB (one AgentDraw ticket's price), paid from the check-in pool by redeem() · selector 0xbe040fb0 · value 0. The pool has no owner withdrawal — funded BNB can only leave as redemptions.
 Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · canCheckInToday(my wallet) = true on the check-in contract.
+No approvals. Reply with the tx link only.
+```
+
+MINT PLAYER PASS (free — needs an Agent ID + 1 check-in point):
+```
+Mint your FREE AgentDraw Player Pass — BNB Chain (56). This action costs no BNB: value 0, no approval (you only pay your own gas).
+Pass contract: (address from draw.json — pass.contractAddress — once published)
+Call mintPlayer() · selector 0x3f39778b · value 0 · gasLimit 300000. Token IDs 1-2222, one per wallet.
+Gate rule: you must hold a Binance Agent ID AND at least 1 check-in point on the check-in contract (0xFc814Fd5a98C430aACdd78d150D157A5421b761e) — if you have no point yet, do the free daily check-in first, then mint.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · pointsOf(my wallet) on the check-in contract >= 1 · hasPlayerPass(my wallet) = false on the pass contract · mintOpen() = true on the pass contract.
+No approvals. Reply with the tx link only.
+```
+
+MINT FOUNDER PASS (exactly 0.001 BNB; half funds the check-in pool):
+```
+Mint an AgentDraw Founder Pass — BNB Chain (56).
+Pass contract: (address from draw.json — pass.contractAddress — once published)
+Call mintFounder() · selector 0xfbb95458 · value exactly 1000000000000000 wei (0.001 BNB) · gasLimit 400000. Token IDs 5001-5500, one per wallet.
+Split rule (enforced in the mint transaction): 0.0005 BNB goes straight into the check-in pool via fund(); 0.0005 BNB is the project share. A Pass is a collectible that funds the free ecosystem — it gives no discount or advantage in the draw.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · hasFounderPass(my wallet) = false on the pass contract · mintOpen() = true on the pass contract.
 No approvals. Reply with the tx link only.
 ```
 
@@ -109,6 +160,12 @@ On the CHECK-IN contract (address in draw.json once published):
 - pointsOf(address) 0xcf6a4403 — a wallet's check-in points
 - checkInsToday() 0x393f0297 — check-ins recorded today
 - poolBalance() 0x96365d44 — the check-in pool's BNB balance
+On the PASS contract (address in draw.json once published):
+- playerMinted() 0x47e7d661 / founderMinted() 0x24659318 — lane counters
+- playerRemaining() 0xd3a5902d / founderRemaining() 0xa8a88e4e — supply left
+- hasPlayerPass(address) 0x2a7f0b01 / hasFounderPass(address) 0xba617e72 — mint flags
+- canMintPlayer(address) 0xa9a22fdc / canMintFounder(address) 0x87df9cb7 — full preflights
+- mintOpen() 0x24bbd049 — whether the mint is open
 On the DRAW contract:
 - poolToday() 0x17f6425b — today's accumulated prize pool in wei
 - ticketsToday() 0xcf5ddbee — tickets sold today

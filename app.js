@@ -28,6 +28,18 @@ const CHECKIN_CONFIG = {
 };
 const CHECKIN = CHECKIN_CONFIG.checkInAddress;
 function checkInReady() { return validAddress(CHECKIN); }
+// The NFT companion (AgentDrawPass), deployed by the owner on
+// 2026-11-05 and wired live the same day; while this address were empty,
+// the Pass section would render its pre-launch state and every pass read
+// would be
+// skipped. Player lane: free, gated on 1+ check-in points. Founder lane:
+// exactly 0.001 BNB, split 50/50 pool/owner inside the mint transaction.
+const PASS_CONFIG = {
+  passAddress: "0x53e43b924e016598942b857ea5B00D37Fc278dE5", // LIVE — AgentDrawPass, deployed 2026-11-05, Sourcify exact match
+  founderPriceWei: "1000000000000000" // 0.001 BNB exactly
+};
+const PASS = PASS_CONFIG.passAddress;
+function passReady() { return validAddress(PASS); }
 const TICKET_PRICE_WEI = "500000000000000"; // 0.0005 BNB exactly, per ticket
 const MAX_PER_TX = 20;
 const POOL_PER_TICKET_WEI = 325000000000000n; // 65% of one ticket (0.000325 BNB) — the pool grows by exactly this per ticket
@@ -60,6 +72,15 @@ const SEL_CI = {
   paused: "0x5c975abb"              // paused() — pauses check-ins only; redeem never pauses
 };
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+// AgentDrawPass selectors (first 4 bytes of keccak256, from its compiled ABI).
+const SEL_PASS = {
+  mintPlayer: "0x3f39778b",         // mintPlayer()
+  mintFounder: "0xfbb95458",        // mintFounder()
+  playerMinted: "0x47e7d661",       // playerMinted()
+  founderMinted: "0x24659318",      // founderMinted()
+  hasPlayerPass: "0x2a7f0b01",      // hasPlayerPass(address)
+  hasFounderPass: "0xba617e72"      // hasFounderPass(address)
+};
 const BOARD_SCAN_CAP = 400;         // enumerate at most the latest 400 entry chunks for the board
 
 // ── i18n — EN / 简体中文 ───────────────────────────────────────
@@ -254,6 +275,25 @@ en: {
   ciCheckInBtn: "Check in free — checkIn()",
   ciRedeemBtn: "Redeem 100 points — redeem()",
   ciHint: "checkIn() sends value 0 — you only pay gas. redeem() needs 100 points and pays exactly 0.0005 BNB from the pool to your wallet.",
+  passTitle: "The AgentDraw Pass — the NFT companion",
+  passTag: "Free lane first · Founder funds the pool",
+  passSub: 'Two passes, both for Agent ID holders, both open from day one. The <b>Player Pass</b> is <b>free</b>: mint it once you hold at least <b>1 check-in point</b> — the paper ticket, earned. The <b>Founder Pass</b> costs exactly <b>0.001 BNB</b> — the dark gold-foil edition — and its split is enforced by the contract: <b>0.0005 BNB goes straight into the check-in pool</b>, 0.0005 BNB to the project. One pass per wallet per lane. A Pass is a collectible that funds the free ecosystem — it grants no discount or advantage in the draw itself.',
+  passSubPre: 'The AgentDraw Pass is not live yet: two passes for Agent ID holders, opening together. The <b>Player Pass</b> will be <b>free</b> with at least <b>1 check-in point</b>; the <b>Founder Pass</b> will cost exactly <b>0.001 BNB</b>, with <b>0.0005 BNB going straight into the check-in pool</b> inside the mint. One per wallet per lane.',
+  passPlayerLabel: "Player minted (free)",
+  passFounderLabel: "Founder minted (paid)",
+  passYouPlayerLabel: "Your Player Pass",
+  passYouFounderLabel: "Your Founder Pass",
+  passStateMinted: "✓ Minted",
+  passStateNotYet: "Not minted yet",
+  passStateNoAddr: "Paste or connect an address",
+  passPromptTitle: "Agent-first — hand this to your AI agent",
+  passAdvSummary: "Advanced — mint directly with a connected wallet",
+  passPlayerBtn: "Mint Player Pass free — mintPlayer()",
+  passFounderBtn: "Mint Founder Pass — 0.001 BNB — mintFounder()",
+  passHint: "mintPlayer() sends value 0 — you pay only gas, and you need 1+ check-in points. mintFounder() sends exactly 0.001 BNB — the contract rejects any other amount, and half of it lands in the check-in pool in the same transaction.",
+  toastPassPlayer: "Player Pass minted — the paper ticket is yours.",
+  toastPassFounder: "Founder Pass minted — 0.0005 BNB just entered the check-in pool.",
+  toastPassNotLive: "The Pass contract is not live yet — these buttons go live with it.",
   toastCheckIn: "Checked in — +1 point. See you tomorrow.",
   toastRedeem: "Redeemed — 0.0005 BNB from the check-in pool is on its way to your wallet.",
   toastCheckInNotLive: "The check-in contract is not live yet — this button goes live with it."
@@ -448,6 +488,25 @@ zh: {
   ciCheckInBtn: "免费签到 — checkIn()",
   ciRedeemBtn: "兑换 100 分 — redeem()",
   ciHint: "checkIn() 发送的金额为 0——你只支付 gas。redeem() 需要 100 分，并从奖池中向你的钱包支付恰好 0.0005 BNB。",
+  passTitle: "AgentDraw 通行证 — NFT 配套",
+  passTag: "免费通道优先 · 创始人版资助奖池",
+  passSub: '两种通行证，均面向 Agent ID 持有者，且自第一天起同时开放。<b>玩家通行证</b><b>免费</b>：持有至少 <b>1 个签到分数</b>即可铸造——这是靠参与赢得的纸质票。<b>创始人通行证</b>价格恰好为 <b>0.001 BNB</b>——深色金箔版——其分配由合约强制执行：<b>0.0005 BNB 直接进入签到奖池</b>，0.0005 BNB 归项目方。每个钱包每种通道限一张。通行证是资助免费生态的收藏品——它在抽奖本身中不提供任何折扣或优势。',
+  passSubPre: 'AgentDraw 通行证尚未上线：两种面向 Agent ID 持有者的通行证将同时开启。<b>玩家通行证</b>将<b>免费</b>，需至少 <b>1 个签到分数</b>；<b>创始人通行证</b>价格恰好为 <b>0.001 BNB</b>，其中 <b>0.0005 BNB 将在铸造时直接进入签到奖池</b>。每个钱包每种通道限一张。',
+  passPlayerLabel: "玩家版已铸造（免费）",
+  passFounderLabel: "创始人版已铸造（付费）",
+  passYouPlayerLabel: "你的玩家通行证",
+  passYouFounderLabel: "你的创始人通行证",
+  passStateMinted: "✓ 已铸造",
+  passStateNotYet: "尚未铸造",
+  passStateNoAddr: "请粘贴或连接一个地址",
+  passPromptTitle: "代理优先 — 把这段交给你的 AI 代理",
+  passAdvSummary: "高级 — 用已连接的钱包直接铸造",
+  passPlayerBtn: "免费铸造玩家通行证 — mintPlayer()",
+  passFounderBtn: "铸造创始人通行证 — 0.001 BNB — mintFounder()",
+  passHint: "mintPlayer() 发送金额为 0——你只付 gas，且需要至少 1 个签到分数。mintFounder() 恰好发送 0.001 BNB——合约拒绝任何其他金额，其中一半会在同一笔交易中进入签到奖池。",
+  toastPassPlayer: "玩家通行证已铸造 — 纸质票归你了。",
+  toastPassFounder: "创始人通行证已铸造 — 0.0005 BNB 已进入签到奖池。",
+  toastPassNotLive: "通行证合约尚未上线 — 这些按钮将随之上线。",
   toastCheckIn: "签到成功 — +1 分。明天见。",
   toastRedeem: "兑换成功 — 签到奖池的 0.0005 BNB 正在发送到你的钱包。",
   toastCheckInNotLive: "签到合约尚未上线 — 上线后此按钮即可使用。"
@@ -629,6 +688,28 @@ Points rule: points are not a token and are never called cash. 100 points = exac
 Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on ${AGENT_ID} > 0) · canCheckInToday(my wallet) = true on the check-in contract.
 No approvals. Reply with the tx link only.`;
   }
+  const ppEl = $("promptPassPlayer");
+  if (ppEl) {
+    const pAddr = passReady() ? PASS : "(pass contract not deployed yet — take the address from the official site / draw.json once it is published)";
+    ppEl.value =
+`Mint your FREE AgentDraw Player Pass — BNB Chain (56). This action costs no BNB: value 0, no approval (you only pay your own gas).
+Pass contract: ${pAddr}
+Call mintPlayer() · selector 0x3f39778b · value 0 · gasLimit 300000. Token IDs 1-2222, one per wallet.
+Gate rule: you must hold a Binance Agent ID AND at least 1 check-in point on the check-in contract (${CHECKIN}) — if you have no point yet, do the free daily check-in first, then mint.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on ${AGENT_ID} > 0) · pointsOf(my wallet) on the check-in contract >= 1 · hasPlayerPass(my wallet) = false on the pass contract · mintOpen() = true on the pass contract.
+No approvals. Reply with the tx link only.`;
+  }
+  const pfEl = $("promptPassFounder");
+  if (pfEl) {
+    const pAddr = passReady() ? PASS : "(pass contract not deployed yet — take the address from the official site / draw.json once it is published)";
+    pfEl.value =
+`Mint an AgentDraw Founder Pass — BNB Chain (56).
+Pass contract: ${pAddr}
+Call mintFounder() · selector 0xfbb95458 · value exactly 1000000000000000 wei (0.001 BNB) · gasLimit 400000. Token IDs 5001-5500, one per wallet.
+Split rule (enforced in the mint transaction): 0.0005 BNB goes straight into the check-in pool via fund(); 0.0005 BNB is the project share. A Pass is a collectible that funds the free ecosystem — it gives no discount or advantage in the draw.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on ${AGENT_ID} > 0) · hasFounderPass(my wallet) = false on the pass contract · mintOpen() = true on the pass contract.
+No approvals. Reply with the tx link only.`;
+  }
 }
 document.querySelectorAll("[data-copy]").forEach(btn => {
   btn.addEventListener("click", async () => {
@@ -667,6 +748,8 @@ function paintDynamicTexts() {
   buildShareLinks();
   const earnSub = document.querySelector("#earn .panel-sub");
   if (earnSub && !checkInReady()) earnSub.innerHTML = t("earnSubPre");
+  const passSub = document.querySelector("#pass .panel-sub");
+  if (passSub && !passReady()) passSub.innerHTML = t("passSubPre");
   const cap = $("statsCaption");
   if (cap && !statsAgg) cap.textContent = t("statsCaptionPre");
   if (cap && statsAgg) paintStatsBand();
@@ -715,6 +798,26 @@ async function refreshCheckIn() {
     })());
   } else {
     jobs.push((async () => { $("ciStatus").textContent = t("ciStatusNoAddr"); })());
+  }
+  await Promise.allSettled(jobs);
+}
+
+// ── Pass: the NFT companion ─────────────────────────────────
+// Lane counters paint for every visitor; the looked-up / connected
+// wallet's per-lane mint flags paint like the draw card. All reads go
+// through the same RPC pool as everything else.
+async function refreshPass() {
+  if (!$("passPlayerCount") || !passReady()) return;
+  const jobs = [
+    (async () => { $("passPlayerCount").textContent = fmtNum(await readUint(PASS, SEL_PASS.playerMinted)) + " / 2,222"; })(),
+    (async () => { $("passFounderCount").textContent = fmtNum(await readUint(PASS, SEL_PASS.founderMinted)) + " / 500"; })()
+  ];
+  if (youAddress) {
+    jobs.push((async () => { $("passYouPlayer").textContent = (await readBool(PASS, SEL_PASS.hasPlayerPass + encAddress(youAddress))) ? t("passStateMinted") : t("passStateNotYet"); })());
+    jobs.push((async () => { $("passYouFounder").textContent = (await readBool(PASS, SEL_PASS.hasFounderPass + encAddress(youAddress))) ? t("passStateMinted") : t("passStateNotYet"); })());
+  } else {
+    jobs.push((async () => { $("passYouPlayer").textContent = t("passStateNoAddr"); })());
+    jobs.push((async () => { $("passYouFounder").textContent = t("passStateNoAddr"); })());
   }
   await Promise.allSettled(jobs);
 }
@@ -1024,6 +1127,22 @@ const ciInBtn = $("ciCheckInBtn");
 if (ciInBtn) ciInBtn.addEventListener("click", () => sendCheckInTx(SEL_CI.checkIn, t("toastCheckIn")));
 const ciOutBtn = $("ciRedeemBtn");
 if (ciOutBtn) ciOutBtn.addEventListener("click", () => sendCheckInTx(SEL_CI.redeem, t("toastRedeem")));
+// Pass writes go to the PASS contract: mintPlayer always value 0
+// (non-payable), mintFounder exactly 0.001 BNB (0x38d7ea4c68000).
+async function sendPassTx(data, weiHex, okMsg) {
+  if (!passReady()) { showToast(t("toastPassNotLive")); return; }
+  const from = walletAddress || await ensureWallet();
+  if (!from) return;
+  try {
+    const txHash = await window.ethereum.request({ method: "eth_sendTransaction", params: [{ from, to: PASS, data, value: weiHex }] });
+    showToast(okMsg + " Tx: " + txHash);
+    setTimeout(refreshAll, 4000);
+  } catch (e) { showToast(t("toastTxFail") + (e.message || e)); }
+}
+const passPlayerBtnEl = $("passPlayerBtn");
+if (passPlayerBtnEl) passPlayerBtnEl.addEventListener("click", () => sendPassTx(SEL_PASS.mintPlayer, "0x0", t("toastPassPlayer")));
+const passFounderBtnEl = $("passFounderBtn");
+if (passFounderBtnEl) passFounderBtnEl.addEventListener("click", () => sendPassTx(SEL_PASS.mintFounder, "0x38d7ea4c68000", t("toastPassFounder")));
 
 // ── Language toggle ───────────────────────────────────────────
 $("langEn").addEventListener("click", () => setLang("en"));
@@ -1057,7 +1176,7 @@ let refreshBusy = false;
 async function refreshAll() {
   if (!contractsReady() || refreshBusy) return;
   refreshBusy = true;
-  try { await paintStats(); await refreshCheckIn(); await refreshToday(); await refreshSpotlight(); await refreshHall(); refreshStats(); if (youAddress) await paintYou(); }
+  try { await paintStats(); await refreshCheckIn(); await refreshPass(); await refreshToday(); await refreshSpotlight(); await refreshHall(); refreshStats(); if (youAddress) await paintYou(); }
   catch { /* keep the last good render */ }
   finally { refreshBusy = false; }
 }
