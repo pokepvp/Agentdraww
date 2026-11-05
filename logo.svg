@@ -1,8 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- AgentDraw mark: a bold draw ticket with perforated stub and a star.
-       Chunky shapes only, so it stays readable at 36px and below. -->
-  <rect x="4" y="4" width="92" height="92" rx="18" fill="#0a0f0d"/>
-  <path d="M18 34 a7 7 0 1 0 0 32 v14 a6 6 0 0 0 6 6 h52 a6 6 0 0 0 6 -6 v-14 a7 7 0 1 1 0 -32 v-14 a6 6 0 0 0 -6 -6 h-52 a6 6 0 0 0 -6 6 z" fill="#10b981"/>
-  <line x1="63" y1="24" x2="63" y2="76" stroke="#0a0f0d" stroke-width="4" stroke-dasharray="5 6" stroke-linecap="round"/>
-  <path d="M41 31 l4.6 9.3 10.3 1.5 -7.4 7.2 1.7 10.2 -9.2 -4.8 -9.2 4.8 1.7 -10.2 -7.4 -7.2 10.3 -1.5 z" fill="#ecfdf5"/>
+  <!-- AgentDraw mark: an ink ticket stub on transparent paper.
+       Semicircular perforation notches bite both short sides, a punched
+       circle is knocked out of the body, a dashed perforation column
+       separates the stub, and one signal-orange dot sits in the stub.
+       True cutouts (mask), chunky geometry — reads clearly at 36px. -->
+  <defs>
+    <mask id="ticket-punch" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+      <rect x="6" y="22" width="88" height="56" rx="10" fill="#fff"/>
+      <circle cx="6" cy="50" r="8" fill="#000"/>
+      <circle cx="94" cy="50" r="7.5" fill="#000"/>
+      <circle cx="38" cy="50" r="9.5" fill="#000"/>
+      <rect x="64.6" y="29" width="3.6" height="5" fill="#000"/>
+      <rect x="64.6" y="37" width="3.6" height="5" fill="#000"/>
+      <rect x="64.6" y="45" width="3.6" height="5" fill="#000"/>
+      <rect x="64.6" y="53" width="3.6" height="5" fill="#000"/>
+      <rect x="64.6" y="61" width="3.6" height="5" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="6" y="22" width="88" height="56" rx="10" fill="#16130E" mask="url(#ticket-punch)"/>
+  <circle cx="80" cy="50" r="5" fill="#FF4A1C"/>
 </svg>

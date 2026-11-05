@@ -10,14 +10,17 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css?v=20261105-1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
 
 <header class="topbar">
   <a class="brand" href="#top" aria-label="AgentDraw home">
-    <img class="brand-mark" src="logo.svg" alt="" width="46" height="46">
-    <span class="brand-text">AGENT <b>DRAW</b></span>
+    <img class="brand-mark" src="logo.svg" alt="" width="38" height="38">
+    <span class="brand-text">AGENTDRAW</span>
   </a>
   <div class="topbar-right">
     <div class="lang-toggle" role="group" aria-label="Language">
@@ -25,55 +28,68 @@
       <button id="langZh" class="lang-btn" type="button">中文</button>
     </div>
     <span id="liveStatus" class="status-pill status-wait" data-i18n="statusNotLive">CONTRACT NOT LIVE YET</span>
-    <button id="connectBtn" class="btn btn-ghost" type="button" data-i18n="connectWallet">Connect wallet</button>
+    <button id="connectBtn" class="btn btn-small" type="button" data-i18n="connectWallet">Connect wallet</button>
   </div>
 </header>
 
 <main id="top">
 
-  <!-- ── 1 · HERO ─────────────────────────────────────────── -->
-  <section class="hero">
-    <img class="hero-mark" src="logo.svg" alt="" aria-hidden="true">
-    <h1 data-i18n-html="heroTitle">One draw. <span class="accent">Every day.</span></h1>
-    <p class="hero-sub" data-i18n-html="heroSub">
-      The daily on-chain draw for <b>Binance .ai Agent ID</b> holders on BNB Chain.
-      Buy tickets for <b>0.0005 BNB</b> each — <b>65% of every ticket</b> forms <b>today's prize pool</b> —
-      and after <b>00:00 UTC</b> one winning ticket takes <b>the whole pool</b>. No NFT, just tickets.
-    </p>
-
-    <div class="stat-grid">
-      <div class="stat-card stat-pool">
-        <span class="stat-label" data-i18n="statPool">Today's pool</span>
-        <span class="stat-value" id="statPool">—</span>
-        <span class="stat-sub" data-i18n="statPoolSub">winner takes the whole pool at settle</span>
+  <!-- ── 01 · HERO — today's pool ─────────────────────────── -->
+  <section class="hero reveal">
+    <div class="hero-grid">
+      <div class="hero-main">
+        <p class="kicker"><span class="sec-num">01</span><span class="kicker-rule"></span><span>Daily on-chain draw · BNB Chain · Est. 2026</span></p>
+        <h1 data-i18n-html="heroTitle">One draw. <span class="accent">Every day.</span></h1>
+        <p class="hero-sub" data-i18n-html="heroSub">
+          The daily on-chain draw for <b>Binance .ai Agent ID</b> holders on BNB Chain.
+          Buy tickets for <b>0.0005 BNB</b> each — <b>65% of every ticket</b> forms <b>today's prize pool</b> —
+          and after <b>00:00 UTC</b> one winning ticket takes <b>the whole pool</b>. No NFT, just tickets.
+        </p>
+        <div class="pool-block">
+          <span class="stat-label" data-i18n="statPool">Today's prize pool</span>
+          <span class="pool-figure mono" id="statPool">—</span>
+          <span class="stat-sub" data-i18n="statPoolSub">winner takes the whole pool at settle</span>
+        </div>
+        <p class="hero-note" id="drawStateNote" data-i18n="noteNotDeployed">The contract is not deployed yet — this page goes live the moment it is.</p>
+        <div class="hero-actions">
+          <a class="btn btn-accent" href="#buy" data-i18n="ctaBuy">Buy tickets</a>
+          <a class="btn" href="#how" data-i18n="ctaHow">How it works</a>
+        </div>
       </div>
-      <div class="stat-card">
-        <span class="stat-label" data-i18n="statTickets">Tickets today</span>
-        <span class="stat-value" id="statTickets">—</span>
-        <span class="stat-sub" data-i18n="statTicketsSub">in today's draw</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label" data-i18n="statEntries">Entries today</span>
-        <span class="stat-value" id="statEntries">—</span>
-        <span class="stat-sub" data-i18n="statEntriesSub">buy transactions today</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label" data-i18n="statSettle">Draw settles in</span>
-        <span class="stat-value mono" id="statCountdown">—</span>
-        <span class="stat-sub">00:00 UTC · 07:00 WIB</span>
-      </div>
-    </div>
-
-    <p class="hero-note" id="drawStateNote" data-i18n="noteNotDeployed">The contract is not deployed yet — this page goes live the moment it is.</p>
-    <div class="hero-actions">
-      <a class="btn btn-accent" href="#buy" data-i18n="ctaBuy">Buy tickets</a>
-      <a class="btn btn-ghost" href="#how" data-i18n="ctaHow">How it works</a>
+      <aside class="hero-side">
+        <div class="side-stat">
+          <span class="stat-label" data-i18n="statTickets">Tickets today</span>
+          <span class="stat-value mono" id="statTickets">—</span>
+          <span class="stat-sub" data-i18n="statTicketsSub">in today's draw</span>
+        </div>
+        <div class="side-stat">
+          <span class="stat-label" data-i18n="statEntries">Entries today</span>
+          <span class="stat-value mono" id="statEntries">—</span>
+          <span class="stat-sub" data-i18n="statEntriesSub">buy transactions today</span>
+        </div>
+        <div class="side-stat">
+          <span class="stat-label" data-i18n="statSettle">Draw settles in</span>
+          <span class="stat-value mono" id="statCountdown">—</span>
+          <span class="stat-sub mono">00:00 UTC · 07:00 WIB</span>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <!-- ── 2 · BUY ──────────────────────────────────────────── -->
-  <section class="panel" id="buy">
-    <h2 data-i18n="buyTitle">🎟️ Buy tickets for today's draw</h2>
+  <!-- ── Ticker ───────────────────────────────────────────── -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- ── 02 · BUY — the ticket ────────────────────────────── -->
+  <section class="section reveal" id="buy">
+    <header class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 data-i18n="buyTitle">Buy tickets — today's draw</h2>
+    </header>
     <p class="panel-sub" data-i18n-html="buySub">
       Your wallet must hold a Binance <b>.ai Agent ID</b>
       (<span class="mono small">0x60B9…022F</span>) — the contract checks it on every entry.
@@ -81,56 +97,66 @@
       as often as you like. Of every ticket, <b>65% forms the prize pool</b> and <b>35% is the project fee</b>, taken at entry.
     </p>
 
-    <div class="qty-row">
-      <div class="qty-stepper">
-        <button class="qty-btn" id="qtyMinus" type="button" aria-label="Fewer tickets">−</button>
-        <div class="qty-value"><b id="qtyValue">5</b><span data-i18n="qtyLabel">tickets</span></div>
-        <button class="qty-btn" id="qtyPlus" type="button" aria-label="More tickets">+</button>
+    <div class="ticket">
+      <div class="ticket-main">
+        <div class="qty-row">
+          <div class="qty-stepper">
+            <button class="qty-btn" id="qtyMinus" type="button" aria-label="Fewer tickets">−</button>
+            <div class="qty-value"><b class="mono" id="qtyValue">5</b><span data-i18n="qtyLabel">tickets</span></div>
+            <button class="qty-btn" id="qtyPlus" type="button" aria-label="More tickets">+</button>
+          </div>
+          <div class="qty-chips">
+            <button class="chip" type="button" data-qty="1">1</button>
+            <button class="chip active" type="button" data-qty="5">5</button>
+            <button class="chip" type="button" data-qty="10">10</button>
+            <button class="chip" type="button" data-qty="20">20</button>
+          </div>
+        </div>
+        <div class="adv-actions">
+          <button class="btn btn-accent" id="enterBtn" type="button" data-i18n="enterBtn">Buy tickets — enter()</button>
+          <span class="small muted" id="enterHint" data-i18n="enterHint">Connect a wallet holding a .ai Agent ID. The button sends exactly tickets × 0.0005 BNB — the contract rejects any other amount. No approvals are involved.</span>
+        </div>
       </div>
-      <div class="qty-chips">
-        <button class="chip" type="button" data-qty="1">1</button>
-        <button class="chip active" type="button" data-qty="5">5</button>
-        <button class="chip" type="button" data-qty="10">10</button>
-        <button class="chip" type="button" data-qty="20">20</button>
+      <div class="ticket-stub" aria-label="Ticket stub">
+        <span class="stub-brand mono">AGENTDRAW · ADMIT</span>
+        <span class="stub-total-label" data-i18n="costLabel">Total cost</span>
+        <span class="cost-total mono" id="costTotal">0.0025 BNB</span>
+        <span class="stub-row mono" data-i18n="perTicket">0.0005 BNB per ticket</span>
+        <span class="stub-row"><span data-i18n="myTicketsLabel">Your tickets today</span>: <b class="mono" id="myTicketsNow">—</b></span>
+        <span class="stub-code mono">BNB CHAIN · 56 · DAILY</span>
       </div>
     </div>
 
-    <div class="cost-box">
-      <span><span data-i18n="costLabel">Total cost</span>: <span class="cost-total mono" id="costTotal">0.0025 BNB</span></span>
-      <span class="muted"><span data-i18n="perTicket">0.0005 BNB per ticket</span> · <span data-i18n="myTicketsLabel">Your tickets today</span>: <b id="myTicketsNow">—</b></span>
-    </div>
-
-    <div class="adv-actions">
-      <button class="btn btn-accent" id="enterBtn" type="button" data-i18n="enterBtn">Buy tickets — enter()</button>
-      <span class="small muted" id="enterHint" data-i18n="enterHint">Connect a wallet holding a .ai Agent ID. The button sends exactly tickets × 0.0005 BNB — the contract rejects any other amount. No approvals are involved.</span>
-    </div>
-
-    <h3 class="prompt-title" data-i18n="promptEnterTitle">🤖 Agent-first: give this to your AI agent</h3>
+    <h3 class="prompt-title" data-i18n="promptEnterTitle">Agent-first — hand this to your AI agent</h3>
     <div class="prompt-box">
       <textarea id="promptEnter" class="prompt-text" rows="8" readonly></textarea>
       <button class="btn btn-accent copy-btn" type="button" data-copy="promptEnter" data-i18n="copyPrompt">COPY PROMPT</button>
     </div>
   </section>
 
-  <!-- ── 3 · TODAY'S BOARD ────────────────────────────────── -->
-  <section class="panel" id="board">
-    <div class="panel-head">
-      <h2 data-i18n="boardTitle">🎫 Today's entries</h2>
-      <span class="refresh-note" data-i18n="boardRefresh">Live from the contract · refreshes every 60s</span>
-    </div>
+  <!-- ── 03 · TODAY'S BOARD ───────────────────────────────── -->
+  <section class="section reveal" id="board">
+    <header class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 data-i18n="boardTitle">Today's entries</h2>
+      <span class="refresh-note mono" data-i18n="boardRefresh">Live from the contract · refreshes every 60s</span>
+    </header>
     <p class="panel-sub" id="boardNote" data-i18n="boardNote">Wallets in today's draw, ranked by tickets held. More tickets = a bigger share of the winning range.</p>
     <div id="boardList" class="board-list">
       <p class="empty" data-i18n="boardEmptyPre">Loading today's entries from the contract…</p>
     </div>
   </section>
 
-  <!-- ── 4 · YOU ──────────────────────────────────────────── -->
-  <section class="panel" id="you">
-    <h2 data-i18n="youTitle">🪪 Your draw card</h2>
+  <!-- ── 04 · YOU ─────────────────────────────────────────── -->
+  <section class="section reveal" id="you">
+    <header class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 data-i18n="youTitle">Your draw card</h2>
+    </header>
     <p class="panel-sub" data-i18n="youSub">Connect a wallet, or paste any address to look up its Agent ID, today's tickets and lifetime wins.</p>
     <div class="you-lookup">
       <input id="youInput" class="addr-input mono" type="text" spellcheck="false" placeholder="0x… wallet address" data-i18n-ph="youPlaceholder">
-      <button class="btn btn-ghost" id="youCheckBtn" type="button" data-i18n="youLookup">Look up</button>
+      <button class="btn" id="youCheckBtn" type="button" data-i18n="youLookup">Look up</button>
     </div>
     <div class="you-grid">
       <div class="you-cell"><span class="stat-label" data-i18n="youWallet">Wallet</span><span class="stat-value small mono" id="youAddr">—</span></div>
@@ -140,74 +166,96 @@
     </div>
   </section>
 
-  <!-- ── 5 · SETTLE ───────────────────────────────────────── -->
-  <section class="panel" id="settle">
-    <h2 data-i18n="settleTitle">🎲 Settle the draw</h2>
+  <!-- ── 05 · SETTLE ──────────────────────────────────────── -->
+  <section class="section reveal" id="settle">
+    <header class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 data-i18n="settleTitle">Settle the draw</h2>
+    </header>
     <p class="panel-sub" data-i18n="settleSub">After 00:00 UTC, anyone can settle the finished day — no owner needed. The contract draws the winning ticket from that day's entry ranges and pays the winner the entire prize pool automatically.</p>
-    <h3 class="prompt-title" data-i18n="promptSettleTitle">🤖 Agent prompt — settle the day (anyone can call it)</h3>
+    <h3 class="prompt-title" data-i18n="promptSettleTitle">Agent prompt — settle the day (anyone can call it)</h3>
     <div class="prompt-box">
       <textarea id="promptSettle" class="prompt-text" rows="7" readonly></textarea>
       <button class="btn btn-accent copy-btn" type="button" data-copy="promptSettle" data-i18n="copyPrompt">COPY PROMPT</button>
     </div>
     <div class="adv-actions">
-      <button class="btn btn-ghost" id="settleBtn" type="button" data-i18n="settleBtn">Call settleDay() from my wallet</button>
+      <button class="btn" id="settleBtn" type="button" data-i18n="settleBtn">Call settleDay() from my wallet</button>
       <span class="small muted" data-i18n="settleNote">Permissionless — one call settles the oldest unsettled day; repeat it to catch up across idle days.</span>
     </div>
   </section>
 
-  <!-- ── 6 · HALL OF DRAWS ────────────────────────────────── -->
-  <section class="panel" id="hall">
-    <div class="panel-head">
-      <h2 data-i18n="hallTitle">🏆 Hall of Draws</h2>
-      <span class="refresh-note" data-i18n="hallRefresh">Settled days, read from dayWinner</span>
-    </div>
+  <!-- ── 06 · HALL OF DRAWS ───────────────────────────────── -->
+  <section class="section reveal" id="hall">
+    <header class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 data-i18n="hallTitle">Hall of Draws</h2>
+      <span class="refresh-note mono" data-i18n="hallRefresh">Settled days, read from dayWinner</span>
+    </header>
     <p class="panel-sub" id="hallNote" data-i18n="hallNote">Every settled day has exactly one winning ticket. Winners are recorded on-chain, forever.</p>
-    <div id="hallList" class="board-list">
+    <div id="hallList" class="board-list stamp-list">
       <p class="empty" data-i18n="hallEmptyPre">No day has been settled yet.</p>
     </div>
   </section>
 
-  <!-- ── 7 · HOW + RULES ──────────────────────────────────── -->
-  <section class="panel" id="how">
-    <h2 data-i18n="howTitle">❓ How it works</h2>
-    <div class="how-grid">
-      <div class="how-card"><span class="how-num">1</span><p data-i18n="how1">Hold a Binance .ai Agent ID in your wallet — it is your entry pass, checked by the contract on every buy.</p></div>
-      <div class="how-card"><span class="how-num">2</span><p data-i18n="how2">Buy 1–20 tickets per transaction at exactly 0.0005 BNB each. 65% of every ticket lands in today's prize pool; 35% is the project fee.</p></div>
-      <div class="how-card"><span class="how-num">3</span><p data-i18n="how3">The day ends at 00:00 UTC. Anyone can then call settleDay() — the contract draws one winning ticket from the day's entry ranges.</p></div>
-      <div class="how-card"><span class="how-num">4</span><p data-i18n="how4">The winning ticket's owner receives the entire prize pool — the 65% shares of every ticket sold that day — paid by the contract in the same transaction.</p></div>
-    </div>
+  <!-- ── 07 · HOW + RULES — ink band ──────────────────────── -->
+  <section class="band reveal" id="how">
+    <div class="band-inner">
+      <header class="sec-head">
+        <span class="sec-num">07</span>
+        <h2 data-i18n="howTitle">How it works</h2>
+      </header>
+      <div class="how-grid">
+        <div class="how-card"><span class="how-num">1</span><p data-i18n="how1">Hold a Binance .ai Agent ID in your wallet — it is your entry pass, checked by the contract on every buy.</p></div>
+        <div class="how-card"><span class="how-num">2</span><p data-i18n="how2">Buy 1–20 tickets per transaction at exactly 0.0005 BNB each. 65% of every ticket lands in today's prize pool; 35% is the project fee.</p></div>
+        <div class="how-card"><span class="how-num">3</span><p data-i18n="how3">The day ends at 00:00 UTC. Anyone can then call settleDay() — the contract draws one winning ticket from the day's entry ranges.</p></div>
+        <div class="how-card"><span class="how-num">4</span><p data-i18n="how4">The winning ticket's owner receives the entire prize pool — the 65% shares of every ticket sold that day — paid by the contract in the same transaction.</p></div>
+      </div>
 
-    <h2 style="margin-top:26px" data-i18n="rulesTitle">📜 The rules — exactly as the contract enforces them</h2>
-    <ol class="rules-list">
-      <li data-i18n-html="rule1"><b>Who can play.</b> Your wallet must hold a Binance .ai Agent ID (the SPACE ID .ai NFT at <span class="mono small">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span>). The contract checks this on every <span class="mono">enter()</span>.</li>
-      <li data-i18n-html="rule2"><b>Tickets.</b> One ticket costs exactly <b>0.0005 BNB</b> — a constant in the contract that nobody can change. Buy <b>1–20 tickets per transaction</b>; repeat buys are allowed and your tickets add up. There is no NFT and nothing to approve.</li>
-      <li data-i18n-html="rule3"><b>The split.</b> Every ticket is split at entry: <b>65%</b> forms that UTC day's prize pool and <b>35%</b> is the project fee, credited to the owner instantly inside the same transaction. Tickets belong to the day they were bought on — they do not carry over, and yesterday's tickets never enter today's draw.</li>
-      <li data-i18n-html="rule4"><b>The draw.</b> After the day ends at <b>00:00 UTC</b>, anyone can call <span class="mono">settleDay()</span>. One ticket index is drawn from the day's range; the wallet whose entry range contains it wins <b>the entire prize pool</b> — the accumulated 65% shares of that day's tickets — paid automatically. Nothing more is deducted at settle: the fee was already taken at entry.</li>
-      <li data-i18n-html="rule5"><b>How the winner is picked — honestly.</b> The winning index is derived from a hash of the day, the day's total tickets and the hash of the block right before the settle transaction. Anyone can recompute it after the settle and verify the winner. It is transparent and tamper-evident, but it is <b>not</b> VRF-grade randomness: a settler chooses when to call, and timing can influence the result. Play with amounts whose loss you can shrug off.</li>
-      <li data-i18n-html="rule6"><b>Empty days.</b> A day with zero entries settles with no winner and no payment. If several days pass unsettled, <span class="mono">settleDay()</span> settles one day per call until it catches up.</li>
-      <li data-i18n-html="rule7"><b>Owner powers are narrow.</b> The owner can pause new entries (settling and prize pools are never affected) and withdraw only the accumulated 35% entry fees. The owner can never touch a prize pool, change the ticket price or the 65/35 split, or pick a winner.</li>
-      <li data-i18n-html="rule8"><b>No promises.</b> Buying a ticket buys a chance, never a guaranteed win. The only payout the contract makes is the winner's prize — the day's full prize pool — at settle. Odds are exactly your tickets divided by the day's total tickets.</li>
-    </ol>
+      <header class="sec-head rules-head">
+        <span class="sec-num">§</span>
+        <h2 data-i18n="rulesTitle">The rules — exactly as the contract enforces them</h2>
+      </header>
+      <ol class="rules-list">
+        <li data-i18n-html="rule1"><b>Who can play.</b> Your wallet must hold a Binance .ai Agent ID (the SPACE ID .ai NFT at <span class="mono small">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span>). The contract checks this on every <span class="mono">enter()</span>.</li>
+        <li data-i18n-html="rule2"><b>Tickets.</b> One ticket costs exactly <b>0.0005 BNB</b> — a constant in the contract that nobody can change. Buy <b>1–20 tickets per transaction</b>; repeat buys are allowed and your tickets add up. There is no NFT and nothing to approve.</li>
+        <li data-i18n-html="rule3"><b>The split.</b> Every ticket is split at entry: <b>65%</b> forms that UTC day's prize pool and <b>35%</b> is the project fee, credited to the owner instantly inside the same transaction. Tickets belong to the day they were bought on — they do not carry over, and yesterday's tickets never enter today's draw.</li>
+        <li data-i18n-html="rule4"><b>The draw.</b> After the day ends at <b>00:00 UTC</b>, anyone can call <span class="mono">settleDay()</span>. One ticket index is drawn from the day's range; the wallet whose entry range contains it wins <b>the entire prize pool</b> — the accumulated 65% shares of that day's tickets — paid automatically. Nothing more is deducted at settle: the fee was already taken at entry.</li>
+        <li data-i18n-html="rule5"><b>How the winner is picked — honestly.</b> The winning index is derived from a hash of the day, the day's total tickets and the hash of the block right before the settle transaction. Anyone can recompute it after the settle and verify the winner. It is transparent and tamper-evident, but it is <b>not</b> VRF-grade randomness: a settler chooses when to call, and timing can influence the result. Play with amounts whose loss you can shrug off.</li>
+        <li data-i18n-html="rule6"><b>Empty days.</b> A day with zero entries settles with no winner and no payment. If several days pass unsettled, <span class="mono">settleDay()</span> settles one day per call until it catches up.</li>
+        <li data-i18n-html="rule7"><b>Owner powers are narrow.</b> The owner can pause new entries (settling and prize pools are never affected) and withdraw only the accumulated 35% entry fees. The owner can never touch a prize pool, change the ticket price or the 65/35 split, or pick a winner.</li>
+        <li data-i18n-html="rule8"><b>No promises.</b> Buying a ticket buys a chance, never a guaranteed win. The only payout the contract makes is the winner's prize — the day's full prize pool — at settle. Odds are exactly your tickets divided by the day's total tickets.</li>
+      </ol>
+    </div>
   </section>
+
+  <!-- ── Ticker ───────────────────────────────────────────── -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+    </div>
+  </div>
 
 </main>
 
-<!-- ── 8 · FOOTER ─────────────────────────────────────────── -->
+<!-- ── FOOTER — ink ───────────────────────────────────────── -->
 <footer class="footer">
-  <div class="footer-brand"><img class="footer-mark" src="logo.svg" alt="">AGENT DRAW</div>
-  <p class="small muted">
-    AgentDraw · daily on-chain draw · BNB Smart Chain (chainId 56)<br>
-    Contract: <span class="mono" id="contractAddr">not deployed yet</span><br>
-    <a id="footerBscScan" href="#" aria-disabled="true" data-i18n="bscScanPending">BscScan — contract (after deployment)</a>
-    · <a id="footerX" href="#" aria-disabled="true" data-i18n="xPending">X — official account (soon)</a>
-    · <a href="llms.txt" data-i18n="llmsLink">llms.txt for agents</a>
-    · <a href="draw.json">draw.json</a>
-  </p>
-  <p class="small muted" data-i18n="footerDisclaimer">An independent project for Binance Agent ID holders. Not affiliated with Binance. Rules above are the contract's rules — verify them on BscScan before you play.</p>
+  <div class="footer-inner">
+    <div class="footer-brand"><img class="footer-mark" src="logo.svg" alt="">AGENTDRAW</div>
+    <p class="small muted">
+      AgentDraw · daily on-chain draw · BNB Smart Chain (chainId 56)<br>
+      Contract: <span class="mono" id="contractAddr">not deployed yet</span><br>
+      <a id="footerBscScan" href="#" aria-disabled="true" data-i18n="bscScanPending">BscScan — contract (after deployment)</a>
+      · <a id="footerX" href="#" aria-disabled="true" data-i18n="xPending">X — official account (soon)</a>
+      · <a href="llms.txt" data-i18n="llmsLink">llms.txt for agents</a>
+      · <a href="draw.json">draw.json</a>
+    </p>
+    <p class="small muted" data-i18n="footerDisclaimer">An independent project for Binance Agent ID holders. Not affiliated with Binance. Rules above are the contract's rules — verify them on BscScan before you play.</p>
+  </div>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=20261105-1"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

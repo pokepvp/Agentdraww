@@ -46,13 +46,13 @@ compile.js                  compile with the shared acs-solc toolchain
 tests/agent-draw-test.cjs   ganache end-to-end suite (58 checks)
 tests/check-deploy-html.cjs ganache verification of deploy.html artifacts (11 checks)
 gen-deploy.cjs              regenerates site/deploy.html from the template + build artifacts
-site/index.html             public site (EN + 简体中文, emerald-on-charcoal design)
+site/index.html             public site (EN + 简体中文, editorial paper-and-ink design)
 site/app.js                 site logic: 5-RPC failover reads, entry board, hall of draws, agent prompts
 site/styles.css             site styles
 site/deploy.html            OWNER tool: deploy + pause + settle + withdraw + summary box
 site/llms.txt               agent-facing facts + paste-ready prompts
 site/draw.json              machine-readable facts (the mint.json equivalent)
-site/icon.svg, logo.svg     ticket-and-star brand mark
+site/icon.svg, logo.svg     ink ticket-stub brand mark
 ```
 
 ## Build & test (local toolchain)
