@@ -19,6 +19,7 @@ const CONTRACT = DRAW_CONFIG.contractAddress;
 const AGENT_ID = DRAW_CONFIG.agentIdAddress;
 const TICKET_PRICE_WEI = "500000000000000"; // 0.0005 BNB exactly, per ticket
 const MAX_PER_TX = 20;
+const POOL_PER_TICKET_WEI = 325000000000000n; // 65% of one ticket (0.000325 BNB) — the pool grows by exactly this per ticket
 // Contract function selectors (first 4 bytes of keccak256), computed from the final ABI.
 const SEL = {
   enter: "0xa59f3e0c",              // enter(uint256)
@@ -132,7 +133,70 @@ en: {
   toastNotDeployed: "The contract is not deployed yet — this button goes live with it.",
   toastTxFail: "Transaction not sent: ",
   toastEnter: "{n} ticket(s) bought for today's draw.",
-  toastSettle: "settleDay() sent — the finished day is being drawn."
+  toastSettle: "settleDay() sent — the finished day is being drawn.",
+  sharePool: "Share today's pool",
+  sharePoolText: "🎟️ Today's AgentDraw prize pool is {pool} — one winning ticket takes the whole pool at the 00:00 UTC settle. Tickets 0.0005 BNB · Agent ID holders only · https://agentdraw.click/",
+  sharePoolTextPre: "🎟️ AgentDraw — the daily on-chain draw for Binance .ai Agent ID holders. Ticket 0.0005 BNB · 65% of every ticket forms the prize pool · winner takes it all at the 00:00 UTC settle · No NFT · https://agentdraw.click/",
+  actTitle: "Live activity",
+  actRefresh: "Newest first · read from entryAt",
+  actNote: "Every entry into today's draw, in purchase order. The contract's entry chunks carry no timestamps, so the stream is ordered by purchase, not by clock.",
+  actEmptyPre: "The stream starts at launch — every entry will appear here the moment it lands.",
+  actEmptyNone: "No tickets sold yet today — the first entry opens the stream.",
+  actMeta: "<b>+{n}</b> tickets · running win chance {pct}%",
+  actMetaShare: "<b>+{n}</b> tickets · {pct}% of today's tickets",
+  tsPlayers: "Players today",
+  tsLargest: "Largest single entry",
+  spotTitle: "Winner spotlight",
+  spotNote: "The latest settled draw · dayWinner + dayPool",
+  spotEmpty: "The first winner appears here after the first settle — 00:00 UTC.",
+  spotPrizeLabel: "Prize paid — the whole pool",
+  spotWinnerLabel: "Winning wallet",
+  spotMeta: "Day {day} · {date} · winning ticket #{ticket}",
+  shareWinnerBtn: "Share the win",
+  shareWinnerText: "🏆 Yesterday's AgentDraw winner took home {prize} — the whole prize pool, paid by the contract at settle. One ticket 0.0005 BNB · Agent ID holders only · https://agentdraw.click/",
+  shareWinnerOldText: "🏆 A recent AgentDraw winner took home {prize} — the whole prize pool. Daily on-chain draw for Agent ID holders · ticket 0.0005 BNB · https://agentdraw.click/",
+  statsTitle: "The all-time record",
+  statsCaption: "Read from the contract over settled days (last 90 days scanned). Ticket totals are computed from pools — every ticket adds exactly 0.000325 BNB of pool.",
+  statsCaptionPre: "Counting starts at launch. These numbers are read from the contract — never typed in by hand.",
+  stPaid: "Paid out to winners",
+  stDraws: "Draws settled",
+  stBiggest: "Biggest single pool",
+  stTickets: "Tickets sold (from pools)",
+  verifyTitle: "Verify it yourself",
+  verifyNote: "Don't take this page's word for anything — the contract is public, and every number on it can be checked with a block explorer or a single eth_call.",
+  verifyAddrLabel: "Contract address",
+  verifyAddrPre: "Published here at launch — and only ever here and on the official X (@AgentDrawBNB). An address that reaches you from anywhere else is not ours.",
+  verifyBsc: "View on BscScan",
+  verifySourcify: "Verify the source on Sourcify",
+  verifySeedTitle: "How the winning ticket is derived",
+  verifySeedNote: "Computed inside settleDay() from public inputs, so anyone can recompute it after the settle transaction and confirm the winner. Transparent and tamper-evident — but not VRF-grade: the settler chooses when to call, and timing can influence the result.",
+  verifyReadsTitle: "Public reads — call them yourself",
+  verifyColFn: "Function",
+  verifyColSel: "Selector",
+  verifyColWhat: "Returns",
+  faqTitle: "Questions, answered straight",
+  faqQ1: "Why can only Agent ID holders play?",
+  faqA1: "AgentDraw is built for the Binance Agent ID ecosystem: the .ai Agent ID is the entry pass, and the contract checks balanceOf on the registry (0x60B9…022F) on every enter(). One identity standard keeps the draw inside the agent economy it was made for — and the agent prompts, llms.txt and draw.json on this site are written for exactly those holders' agents.",
+  faqQ2: "What happens if nobody calls settleDay()?",
+  faqA2: "Nothing is lost and nothing is stuck. The finished day's pool simply waits in the contract — settling is permissionless, so anyone (a player, an agent, you) can call settleDay() at any later time. Each call settles the oldest unsettled day, so a backlog clears one day per call until it catches up.",
+  faqQ3: "Can the owner touch the prize pool?",
+  faqA3: "No. The only balance the owner can withdraw is the accumulated 35% entry fees, which are credited separately at entry. Prize pools sit in their own accounting until settleDay() pays them to the winner — the contract's invariant is balance == owner fees + unsettled prize pools, and it was proven in the test suite, including a withdraw attempt against a live pool.",
+  faqQ4: "When exactly does the day roll over?",
+  faqA4: "At 00:00 UTC — 07:00 WIB. A day is the UTC day index (timestamp / 86400): tickets bought before the rollover belong to the old day, tickets after it belong to the new one. The countdown in the hero is the time left in the current day.",
+  faqQ5: "How is the winner picked — and can it be checked?",
+  faqA5: "At settle, the contract derives the winning ticket as keccak256(day, totalTickets, blockhash of the block before the settle transaction) mod totalTickets, +1, then pays the wallet whose entry range contains that ticket. Anyone can recompute it after the fact and verify the winner — but be straight about the limit: this is verifiable-after-the-fact, not VRF-grade randomness, because the settler picks the moment of the call.",
+  faqQ6: "When is the 35% fee taken?",
+  faqA6: "Instantly, at entry, inside the same transaction: of every 0.0005 BNB ticket, exactly 0.000175 BNB is credited to the owner's fee balance and 0.000325 BNB joins the prize pool. Nothing more is deducted at settle — the winner receives 100% of the accumulated pool. The split is a constant in the contract and cannot be changed.",
+  faqQ7: "What happens on a day with zero entries?",
+  faqA7: "It settles cleanly: no winner, no payment, and the next settleDay() call moves on to the following day. An empty day costs nobody anything.",
+  faqQ8: "How many tickets can I buy?",
+  faqA8: "1–20 tickets per enter() transaction, at exactly 0.0005 BNB per ticket — any other amount is rejected by the contract. There is no limit on the number of transactions: buy again as often as you like and your tickets add up in today's ranges.",
+  agentsTitle: "Built for agents",
+  agentsNote: "AgentDraw is agent-first. The complete machine-readable spec lives on this domain — point your agent at it and it can play, settle and verify without scraping this page.",
+  agentsLlms: "the full draw spec — facts, rules, prompts — in plain text",
+  agentsJson: "facts, selectors and copy-ready prompts as structured JSON",
+  agentsClawhub: "ClawHub skill — published at launch",
+  agentsEnterLabel: "The whole game, in one line:"
 },
 zh: {
   docTitle: "AgentDraw — 币安 Agent ID 持有者每日链上抽奖",
@@ -224,7 +288,70 @@ zh: {
   toastNotDeployed: "合约尚未部署 — 此按钮将在部署后启用。",
   toastTxFail: "交易未发送：",
   toastEnter: "已成功购买 {n} 张今日抽奖票。",
-  toastSettle: "settleDay() 已发送 — 正在为已结束的日期开奖。"
+  toastSettle: "settleDay() 已发送 — 正在为已结束的日期开奖。",
+  sharePool: "分享今日奖池",
+  sharePoolText: "🎟️ 今日 AgentDraw 奖池已达 {pool}——00:00 UTC 结算时，一张中奖票独得全部奖池。票价 0.0005 BNB · 仅限 Agent ID 持有者 · https://agentdraw.click/",
+  sharePoolTextPre: "🎟️ AgentDraw——专为币安 .ai Agent ID 持有者打造的每日链上抽奖。票价 0.0005 BNB · 每张票 65% 汇入奖池 · 00:00 UTC 结算赢家独得全部 · 没有 NFT · https://agentdraw.click/",
+  actTitle: "实时动态",
+  actRefresh: "最新在前 · 数据来自 entryAt",
+  actNote: "今日抽奖的每一笔购票，按购买顺序排列。合约的购票记录不带时间戳，因此本列表按购买顺序而非时钟排序。",
+  actEmptyPre: "上线后动态开始流动——每一笔购票落地的瞬间都会出现在这里。",
+  actEmptyNone: "今日尚无人购票——第一笔购票将开启动态流。",
+  actMeta: "<b>+{n}</b> 张 · 累计中奖率 {pct}%",
+  actMetaShare: "<b>+{n}</b> 张 · 占今日票数 {pct}%",
+  tsPlayers: "今日玩家数",
+  tsLargest: "单笔最大购票",
+  spotTitle: "赢家特写",
+  spotNote: "最近一次已结算抽奖 · dayWinner + dayPool",
+  spotEmpty: "首位赢家将在第一次结算后出现在这里——00:00 UTC。",
+  spotPrizeLabel: "已支付奖金 — 全部奖池",
+  spotWinnerLabel: "中奖钱包",
+  spotMeta: "第 {day} 天 · {date} · 中奖票 #{ticket}",
+  shareWinnerBtn: "分享这次中奖",
+  shareWinnerText: "🏆 昨日 AgentDraw 赢家带走了 {prize}——全部奖池，由合约在结算时直接支付。每张票 0.0005 BNB · 仅限 Agent ID 持有者 · https://agentdraw.click/",
+  shareWinnerOldText: "🏆 近期一位 AgentDraw 赢家带走了 {prize}——全部奖池。面向 Agent ID 持有者的每日链上抽奖 · 每张票 0.0005 BNB · https://agentdraw.click/",
+  statsTitle: "历史总记录",
+  statsCaption: "数据读取自合约的已结算日期（扫描最近 90 天）。票数由奖池反推——每张票恰好为奖池贡献 0.000325 BNB。",
+  statsCaptionPre: "计数从上线开始。这些数字读取自合约——绝非手工填写。",
+  stPaid: "已支付给赢家的总额",
+  stDraws: "已结算期数",
+  stBiggest: "单期最大奖池",
+  stTickets: "已售票数（由奖池推算）",
+  verifyTitle: "亲自验证",
+  verifyNote: "不要轻信本页面的任何说法——合约是公开的，这里每一个数字都可以用区块浏览器或一次 eth_call 核实。",
+  verifyAddrLabel: "合约地址",
+  verifyAddrPre: "将在上线时在此公布——且只会在此处与官方 X（@AgentDrawBNB）公布。从任何其他渠道获得的地址都不是我们的。",
+  verifyBsc: "在 BscScan 查看",
+  verifySourcify: "在 Sourcify 验证源码",
+  verifySeedTitle: "中奖票如何产生",
+  verifySeedNote: "在 settleDay() 内部由公开输入计算得出，因此任何人都能在结算交易后复算并确认赢家。透明且防篡改——但并非 VRF 级别：结算者可以自行选择调用时机，时机可能影响结果。",
+  verifyReadsTitle: "公开读取函数 — 可自行调用",
+  verifyColFn: "函数",
+  verifyColSel: "选择器",
+  verifyColWhat: "返回",
+  faqTitle: "常见问题，直截了当",
+  faqQ1: "为什么只有 Agent ID 持有者能玩？",
+  faqA1: "AgentDraw 为币安 Agent ID 生态而建：.ai Agent ID 是入场凭证，合约会在每次 enter() 时检查登记合约（0x60B9…022F）的 balanceOf。统一的身份标准让抽奖留在这个为之打造的 agent 经济体内——本站的 agent 提示词、llms.txt 与 draw.json 正是为这些持有者的 agent 所写。",
+  faqQ2: "如果没人调用 settleDay() 会怎样？",
+  faqA2: "什么都不会丢失，也不会卡住。已结束日期的奖池只是静静待在合约里——结算无需许可，任何人（玩家、agent、你）都可以随时调用 settleDay()。每次调用结算最早一个未结算日期，积压会逐日补齐。",
+  faqQ3: "项目方能动用奖池吗？",
+  faqA3: "不能。项目方唯一能提取的余额是购票时单独计入的 35% 手续费累计额。奖池有独立的记账，直到 settleDay() 将其支付给赢家——合约的不变量是：余额 == 项目方手续费 + 未结算奖池之和，这一点已在测试套件中证明，包括在奖池存续期间尝试提款的场景。",
+  faqQ4: "日期到底在什么时候切换？",
+  faqA4: "在 00:00 UTC——即 WIB 时间 07:00。一天即 UTC 天序号（时间戳 / 86400）：切换前购买的票属于旧日，切换后购买的属于新日。页面顶部的倒计时就是当前这一天的剩余时间。",
+  faqQ5: "赢家如何产生——可以核查吗？",
+  faqA5: "结算时，合约按 keccak256（日期、当日总票数、结算交易前一个区块的哈希）对总票数取模再 +1，推导出中奖票号，并支付给该票号所在购票区间的钱包。事后任何人都可以复算并核实赢家——但也要如实说明其局限：这是事后可验证，而非 VRF 级别的随机数，因为结算者可以挑选调用的时机。",
+  faqQ6: "35% 手续费什么时候收取？",
+  faqA6: "即时收取，就在购票的同一笔交易内：每张 0.0005 BNB 的票中，恰好 0.000175 BNB 计入项目方手续费余额，0.000325 BNB 汇入奖池。结算时不再扣除任何费用——赢家获得累计奖池的 100%。该分配比例是合约常量，无法更改。",
+  faqQ7: "某天零购票会怎样？",
+  faqA7: "会干净地结算：没有赢家、没有付款，下一次 settleDay() 调用直接进入下一天。空日期不会让任何人付出代价。",
+  faqQ8: "我能买多少张票？",
+  faqA8: "每笔 enter() 交易可买 1–20 张，每张恰好 0.0005 BNB——任何其他金额都会被合约拒绝。交易笔数不限：可任意次重复购买，票数会在今日区间中累加。",
+  agentsTitle: "为 Agent 而建",
+  agentsNote: "AgentDraw 以 agent 为先。完整的机器可读规范就托管在本域名——让你的 agent 读取它，即可参与、结算与验证，无需抓取本页面。",
+  agentsLlms: "完整抽奖规范——事实、规则、提示词——纯文本格式",
+  agentsJson: "事实、选择器与可复制提示词，结构化 JSON",
+  agentsClawhub: "ClawHub 技能 — 上线时发布",
+  agentsEnterLabel: "整个玩法，一行说清："
 }
 };
 let lang = "en";
@@ -254,6 +381,7 @@ function applyLang() {
   }
   buildPrompts();
   paintQty();
+  paintDynamicTexts();
   if (contractsReady()) { refreshAll(); if (youAddress) paintYou(); }
 }
 function setLang(l) {
@@ -381,11 +509,31 @@ function paintCountdown() {
 }
 setInterval(paintCountdown, 1000); paintCountdown();
 
+// ── Share links (X intents) ───────────────────────────────────
+// The pool share text carries a figure ONLY when the contract is live
+// and today's pool is actually > 0 — never a fabricated number. The
+// winner share link is built by paintSpotlight from real settled data.
+let lastPoolWei = null;
+function xIntent(text) { return "https://x.com/intent/tweet?text=" + encodeURIComponent(text); }
+function buildShareLinks() {
+  const btn = $("sharePoolBtn");
+  if (!btn) return;
+  const live = contractsReady() && lastPoolWei !== null && lastPoolWei > 0n;
+  btn.href = xIntent(live ? t("sharePoolText", { pool: formatBNB(lastPoolWei) }) : t("sharePoolTextPre"));
+}
+// JS-owned texts that applyLang's data-i18n pass cannot paint.
+function paintDynamicTexts() {
+  buildShareLinks();
+  const cap = $("statsCaption");
+  if (cap && !statsAgg) cap.textContent = t("statsCaptionPre");
+  if (cap && statsAgg) paintStatsBand();
+}
+
 // ── Hero stats + status — each paints independently ───────────
 async function paintStats() {
   if (!contractsReady()) return;
   const jobs = [
-    (async () => { $("statPool").textContent = formatBNB(await readUint(CONTRACT, SEL.poolToday)); })(),
+    (async () => { const p = await readUint(CONTRACT, SEL.poolToday); lastPoolWei = p; $("statPool").textContent = formatBNB(p); buildShareLinks(); })(),
     (async () => { $("statTickets").textContent = fmtNum(await readUint(CONTRACT, SEL.ticketsToday)); })(),
     (async () => { $("statEntries").textContent = fmtNum(await readUint(CONTRACT, SEL.entriesCountToday)); })(),
     (async () => {
@@ -401,47 +549,102 @@ async function paintStats() {
   await Promise.allSettled(jobs);
 }
 
-// ── Today's entries board ─────────────────────────────────────
+// ── Today's chunks — one read pass feeds board, activity, stats ──
 // Entry chunks are read via entryAt(day, i): each chunk's tickets are
-// (prevCumulative, cumulative]. Aggregated per wallet for the board.
-async function refreshBoard() {
-  const list = $("boardList");
+// (prevCumulative, cumulative]. The loader returns the raw chunks (in
+// purchase order), the per-wallet aggregation, and the day's totals.
+async function loadTodayChunks() {
   const day = BigInt(todayUTC());
   const count = Number(await readUint(CONTRACT, SEL.entriesCountToday));
   const totalTickets = await readUint(CONTRACT, SEL.ticketsToday);
-  if (count === 0 || totalTickets === 0n) { list.innerHTML = '<p class="empty">' + t("boardEmptyNone") + "</p>"; return; }
-  const start = Math.max(0, count - BOARD_SCAN_CAP);
-  let prevCum = 0n;
-  if (start > 0) {
-    const base = await ethCall(CONTRACT, SEL.entryAt + encUint(day) + encUint(start - 1));
-    prevCum = BigInt("0x" + base.slice(-64));
-  }
-  const idxs = [];
-  for (let i = start; i < count; i += 1) idxs.push(i);
+  const chunks = [];
   const byWallet = new Map();
-  for (let b = 0; b < idxs.length; b += 12) {
-    const batch = idxs.slice(b, b + 12);
-    const res = await Promise.allSettled(batch.map(i => ethCall(CONTRACT, SEL.entryAt + encUint(day) + encUint(i))));
-    res.forEach((r) => {
-      if (r.status !== "fulfilled" || !r.value || r.value === "0x") return;
-      const wallet = "0x" + r.value.slice(-104, -64);
-      const cum = BigInt("0x" + r.value.slice(-64));
-      const n = cum - prevCum;
-      prevCum = cum;
-      if (!validAddress(wallet) || n <= 0n) return;
-      const k = wallet.toLowerCase();
-      byWallet.set(k, (byWallet.get(k) || 0n) + n);
-    });
+  if (count > 0 && totalTickets > 0n) {
+    const start = Math.max(0, count - BOARD_SCAN_CAP);
+    let prevCum = 0n;
+    if (start > 0) {
+      const base = await ethCall(CONTRACT, SEL.entryAt + encUint(day) + encUint(start - 1));
+      prevCum = BigInt("0x" + base.slice(-64));
+    }
+    for (let i = start; i < count; i += 12) {
+      const idxs = [];
+      for (let j = i; j < Math.min(i + 12, count); j += 1) idxs.push(j);
+      const res = await Promise.allSettled(idxs.map(k => ethCall(CONTRACT, SEL.entryAt + encUint(day) + encUint(k))));
+      for (const r of res) {
+        if (r.status !== "fulfilled" || !r.value || r.value === "0x") continue;
+        const wallet = "0x" + r.value.slice(-104, -64);
+        const cum = BigInt("0x" + r.value.slice(-64));
+        const n = cum - prevCum;
+        prevCum = cum;
+        if (!validAddress(wallet) || n <= 0n) continue;
+        chunks.push({ wallet, n });
+        const key = wallet.toLowerCase();
+        byWallet.set(key, (byWallet.get(key) || 0n) + n);
+      }
+    }
   }
+  return { count, totalTickets, chunks, byWallet, capped: count > BOARD_SCAN_CAP };
+}
+
+function paintBoard(data) {
+  const list = $("boardList");
+  if (!data.chunks.length) { list.innerHTML = '<p class="empty">' + t("boardEmptyNone") + "</p>"; return; }
   const note = $("boardNote");
-  if (note && count > BOARD_SCAN_CAP) note.textContent = t("boardNoteCapped", { cap: BOARD_SCAN_CAP });
-  const rows = [...byWallet.entries()].map(([addr, n]) => ({ addr, n })).sort((a, b2) => (a.n === b2.n ? 0 : a.n > b2.n ? -1 : 1));
+  if (note && data.capped) note.textContent = t("boardNoteCapped", { cap: BOARD_SCAN_CAP });
+  const totalTickets = data.totalTickets;
+  const rows = [...data.byWallet.entries()].map(([addr, n]) => ({ addr, n })).sort((a, b2) => (a.n === b2.n ? 0 : a.n > b2.n ? -1 : 1));
   if (!rows.length) { list.innerHTML = '<p class="empty">' + t("boardEmptyNone") + "</p>"; return; }
   list.innerHTML = rows.slice(0, 10).map((r, i) => {
     const you = youAddress && sameAddr(r.addr, youAddress);
     const pct = totalTickets > 0n ? (Number(r.n) / Number(totalTickets)) * 100 : 0;
     return `<div class="board-row${i === 0 ? " board-first" : ""}${you ? " board-you" : ""}"><span class="board-rank">${i === 0 ? "🎟️" : "#" + (i + 1)}</span><span class="board-addr">${shortenAddress(r.addr)}${you ? ' <b class="you-chip">' + t("youChip") + "</b>" : ""}</span><span class="board-meta">${t("boardMeta", { n: fmtNum(r.n), pct: pct.toFixed(1) })}</span></div>`;
   }).join("");
+}
+
+// Live activity stream: today's chunks, newest first. The views expose
+// no timestamps, so rows are ordered by purchase only. Each row shows
+// the buyer's running win chance right after that entry — unless the
+// scan was capped, in which case the chunk's plain share is shown.
+function paintActivity(data) {
+  const list = $("actList");
+  if (!list) return;
+  if (!data.chunks.length) { list.innerHTML = '<p class="empty">' + t("actEmptyNone") + "</p>"; return; }
+  const total = data.totalTickets;
+  const run = new Map();
+  const rows = data.chunks.map(c => {
+    const key = c.wallet.toLowerCase();
+    const cumRun = (run.get(key) || 0n) + c.n;
+    run.set(key, cumRun);
+    return {
+      wallet: c.wallet,
+      n: c.n,
+      pctRun: total > 0n ? (Number(cumRun) / Number(total)) * 100 : 0,
+      pctShare: total > 0n ? (Number(c.n) / Number(total)) * 100 : 0
+    };
+  });
+  list.innerHTML = rows.slice(-12).reverse().map(r => {
+    const you = youAddress && sameAddr(r.wallet, youAddress);
+    const meta = data.capped
+      ? t("actMetaShare", { n: fmtNum(r.n), pct: r.pctShare.toFixed(1) })
+      : t("actMeta", { n: fmtNum(r.n), pct: r.pctRun.toFixed(1) });
+    return `<div class="board-row${you ? " board-you" : ""}"><span class="board-rank">🎟️</span><span class="board-addr">${shortenAddress(r.wallet)}${you ? ' <b class="you-chip">' + t("youChip") + "</b>" : ""}</span><span class="board-meta">${meta}</span></div>`;
+  }).join("");
+}
+
+function paintTodayStats(data) {
+  $("tsTickets").textContent = fmtNum(data.totalTickets);
+  $("tsPlayers").textContent = fmtNum(data.byWallet.size);
+  $("tsEntries").textContent = fmtNum(data.count);
+  let largest = 0n;
+  for (const c of data.chunks) if (c.n > largest) largest = c.n;
+  $("tsLargest").textContent = data.chunks.length ? fmtNum(largest) : "—";
+}
+
+async function refreshToday() {
+  const data = await loadTodayChunks();
+  paintBoard(data);
+  paintActivity(data);
+  paintTodayStats(data);
 }
 
 // ── Hall of Draws ─────────────────────────────────────────────
@@ -474,6 +677,105 @@ async function refreshHall() {
   }).join("");
 }
 
+// ── Winner spotlight ──────────────────────────────────────────
+// The most recent settled day: scan back from yesterday, at most 14
+// days, for the first day with a recorded winner and a pool > 0. The
+// prize shown is that day's dayPool — settleDay paid 100% of it.
+let spotData = null;
+async function refreshSpotlight() {
+  if (!$("spotCard")) return;
+  const today = todayUTC();
+  let found = null;
+  for (let d = today - 1; d >= Math.max(0, today - 14) && !found; d -= 1) {
+    const winner = await readAddress(CONTRACT, SEL.dayWinner + encUint(d)).catch(() => "");
+    if (!validAddress(winner) || sameAddr(winner, ZERO_ADDRESS)) continue;
+    const pool = await readUint(CONTRACT, SEL.dayPool + encUint(d)).catch(() => 0n);
+    if (pool <= 0n) continue;
+    const ticket = await readUint(CONTRACT, SEL.dayWinningTicket + encUint(d)).catch(() => 0n);
+    found = { day: d, addr: winner, pool, ticket };
+  }
+  spotData = found;
+  paintSpotlight();
+}
+function paintSpotlight() {
+  const card = $("spotCard");
+  if (!card) return;
+  if (!spotData) { card.innerHTML = '<p class="empty">' + t("spotEmpty") + "</p>"; return; }
+  const w = spotData;
+  const date = new Date(w.day * 86400000).toISOString().slice(0, 10);
+  const you = youAddress && sameAddr(w.addr, youAddress);
+  const shareText = t(w.day === todayUTC() - 1 ? "shareWinnerText" : "shareWinnerOldText", { prize: formatBNB(w.pool) });
+  card.innerHTML = `<div class="spot-grid">
+    <div class="spot-main">
+      <span class="stat-label">${t("spotPrizeLabel")}</span>
+      <span class="pool-figure mono spot-figure">${formatBNB(w.pool)}</span>
+      <span class="stat-sub">${t("spotMeta", { day: w.day, date, ticket: w.ticket.toString() })}</span>
+    </div>
+    <div class="spot-side">
+      <span class="stat-label">${t("spotWinnerLabel")}</span>
+      <span class="spot-addr-row"><a class="spot-addr mono" href="https://bscscan.com/address/${w.addr}" target="_blank" rel="noopener">${shortenAddress(w.addr)}</a>${you ? ' <b class="you-chip">' + t("youChip") + "</b>" : ""}</span>
+      <a class="btn spot-share" href="${xIntent(shareText)}" target="_blank" rel="noopener">${t("shareWinnerBtn")}</a>
+    </div>
+  </div>`;
+}
+
+// ── All-time stats band ───────────────────────────────────────
+// One pass per page load (not part of the 60s loop): scan back up to
+// 90 days from yesterday in batches, aggregating settled days (a day
+// counts when it has a recorded winner and a pool > 0 — dayPool is
+// never cleared at settle, so it is exactly what the winner was paid).
+// Implied tickets = totalPaid / 0.000325 BNB, exact by construction.
+let statsAgg = null;
+let statsDone = false;
+let statsRunning = false;
+async function refreshStats() {
+  if (statsDone || statsRunning) return;
+  statsRunning = true;
+  try {
+    const today = todayUTC();
+    const days = [];
+    for (let d = today - 1; d >= Math.max(0, today - 90); d -= 1) days.push(d);
+    let totalPaid = 0n, draws = 0, biggest = 0n;
+    for (let i = 0; i < days.length; i += 15) {
+      const batch = days.slice(i, i + 15);
+      const calls = [];
+      for (const d of batch) {
+        calls.push(readAddress(CONTRACT, SEL.dayWinner + encUint(d)));
+        calls.push(readUint(CONTRACT, SEL.dayPool + encUint(d)));
+      }
+      const res = await Promise.allSettled(calls);
+      batch.forEach((d, j) => {
+        const w = res[j * 2], p = res[j * 2 + 1];
+        if (w.status === "fulfilled" && p.status === "fulfilled" && validAddress(w.value) && !sameAddr(w.value, ZERO_ADDRESS) && p.value > 0n) {
+          draws += 1;
+          totalPaid += p.value;
+          if (p.value > biggest) biggest = p.value;
+        }
+      });
+    }
+    statsAgg = { totalPaid, draws, biggest };
+    statsDone = true;
+    paintStatsBand();
+  } catch { /* leave the band in its empty state; a later load can retry */ }
+  finally { statsRunning = false; }
+}
+function paintStatsBand() {
+  const cap = $("statsCaption");
+  if (!statsAgg || statsAgg.draws === 0) {
+    $("stPaid").textContent = "—";
+    $("stDraws").textContent = "—";
+    $("stBiggest").textContent = "—";
+    $("stTickets").textContent = "—";
+    if (cap) cap.textContent = t("statsCaptionPre");
+    return;
+  }
+  $("stPaid").textContent = formatBNB(statsAgg.totalPaid);
+  $("stDraws").textContent = fmtNum(statsAgg.draws);
+  $("stBiggest").textContent = formatBNB(statsAgg.biggest);
+  $("stTickets").textContent = fmtNum(statsAgg.totalPaid / POOL_PER_TICKET_WEI);
+  if (cap) cap.textContent = t("statsCaption");
+}
+
 // ── YOU card ──────────────────────────────────────────────────
 let youAddress = "";
 async function paintYou() {
@@ -493,6 +795,7 @@ async function paintYou() {
     (async () => { $("youWins").textContent = "🏆 " + fmtNum(await readUint(CONTRACT, SEL.winsOf + encAddress(youAddress))); })()
   ];
   await Promise.allSettled(jobs);
+  if (spotData) paintSpotlight();
 }
 $("youCheckBtn").addEventListener("click", () => {
   const v = $("youInput").value.trim();
@@ -546,6 +849,17 @@ function paintFooter() {
     const scan = $("footerBscScan");
     scan.href = "https://bscscan.com/address/" + CONTRACT; scan.textContent = t("bscScanLive");
     scan.removeAttribute("aria-disabled");
+    // Verify section: swap the pre-launch note for the live address block.
+    const vAddr = $("verifyAddr");
+    if (vAddr) vAddr.textContent = CONTRACT;
+    const vBsc = $("verifyBsc");
+    if (vBsc) vBsc.href = "https://bscscan.com/address/" + CONTRACT;
+    const vSrc = $("verifySourcify");
+    if (vSrc) vSrc.href = "https://sourcify.dev/#/lookup/" + CONTRACT;
+    const vLive = $("verifyAddrLive");
+    if (vLive) vLive.hidden = false;
+    const vPre = $("verifyAddrPre");
+    if (vPre) vPre.hidden = true;
   }
   if (DRAW_CONFIG.xUrl) {
     const x = $("footerX");
@@ -556,7 +870,7 @@ let refreshBusy = false;
 async function refreshAll() {
   if (!contractsReady() || refreshBusy) return;
   refreshBusy = true;
-  try { await paintStats(); await refreshBoard(); await refreshHall(); if (youAddress) await paintYou(); }
+  try { await paintStats(); await refreshToday(); await refreshSpotlight(); await refreshHall(); refreshStats(); if (youAddress) await paintYou(); }
   catch { /* keep the last good render */ }
   finally { refreshBusy = false; }
 }

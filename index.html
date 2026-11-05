@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -63,6 +63,7 @@
         <div class="hero-actions">
           <a class="btn btn-accent" href="#buy" data-i18n="ctaBuy">Buy tickets</a>
           <a class="btn" href="#how" data-i18n="ctaHow">How it works</a>
+          <a class="btn" id="sharePoolBtn" href="https://x.com/intent/tweet" target="_blank" rel="noopener"><span data-i18n="sharePool">Share today's pool</span></a>
         </div>
       </div>
       <aside class="hero-side">
@@ -156,10 +157,29 @@
     </div>
   </section>
 
-  <!-- ── 04 · YOU ─────────────────────────────────────────── -->
-  <section class="section reveal" id="you">
+  <!-- ── 04 · LIVE ACTIVITY ───────────────────────────────── -->
+  <section class="section reveal" id="activity">
     <header class="sec-head">
       <span class="sec-num">04</span>
+      <h2 data-i18n="actTitle">Live activity</h2>
+      <span class="refresh-note mono" data-i18n="actRefresh">Newest first · read from entryAt</span>
+    </header>
+    <p class="panel-sub" data-i18n="actNote">Every entry into today's draw, in purchase order. The contract's entry chunks carry no timestamps, so the stream is ordered by purchase, not by clock.</p>
+    <div class="today-stats">
+      <div class="today-cell"><span class="stat-label" data-i18n="statTickets">Tickets today</span><span class="stat-value mono" id="tsTickets">—</span></div>
+      <div class="today-cell"><span class="stat-label" data-i18n="tsPlayers">Players today</span><span class="stat-value mono" id="tsPlayers">—</span></div>
+      <div class="today-cell"><span class="stat-label" data-i18n="statEntries">Entries today</span><span class="stat-value mono" id="tsEntries">—</span></div>
+      <div class="today-cell"><span class="stat-label" data-i18n="tsLargest">Largest single entry</span><span class="stat-value mono" id="tsLargest">—</span></div>
+    </div>
+    <div id="actList" class="board-list">
+      <p class="empty" data-i18n="actEmptyPre">The stream starts at launch — every entry will appear here the moment it lands.</p>
+    </div>
+  </section>
+
+  <!-- ── 05 · YOU ─────────────────────────────────────────── -->
+  <section class="section reveal" id="you">
+    <header class="sec-head">
+      <span class="sec-num">05</span>
       <h2 data-i18n="youTitle">Your draw card</h2>
     </header>
     <p class="panel-sub" data-i18n="youSub">Connect a wallet, or paste any address to look up its Agent ID, today's tickets and lifetime wins.</p>
@@ -175,10 +195,10 @@
     </div>
   </section>
 
-  <!-- ── 05 · SETTLE ──────────────────────────────────────── -->
+  <!-- ── 06 · SETTLE ──────────────────────────────────────── -->
   <section class="section reveal" id="settle">
     <header class="sec-head">
-      <span class="sec-num">05</span>
+      <span class="sec-num">06</span>
       <h2 data-i18n="settleTitle">Settle the draw</h2>
     </header>
     <p class="panel-sub" data-i18n="settleSub">After 00:00 UTC, anyone can settle the finished day — no owner needed. The contract draws the winning ticket from that day's entry ranges and pays the winner the entire prize pool automatically.</p>
@@ -193,10 +213,22 @@
     </div>
   </section>
 
-  <!-- ── 06 · HALL OF DRAWS ───────────────────────────────── -->
+  <!-- ── 07 · WINNER SPOTLIGHT ────────────────────────────── -->
+  <section class="section reveal" id="spotlight">
+    <header class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 data-i18n="spotTitle">Winner spotlight</h2>
+      <span class="refresh-note mono" data-i18n="spotNote">The latest settled draw · dayWinner + dayPool</span>
+    </header>
+    <div id="spotCard" class="spot-card">
+      <p class="empty" data-i18n="spotEmpty">The first winner appears here after the first settle — 00:00 UTC.</p>
+    </div>
+  </section>
+
+  <!-- ── 08 · HALL OF DRAWS ───────────────────────────────── -->
   <section class="section reveal" id="hall">
     <header class="sec-head">
-      <span class="sec-num">06</span>
+      <span class="sec-num">08</span>
       <h2 data-i18n="hallTitle">Hall of Draws</h2>
       <span class="refresh-note mono" data-i18n="hallRefresh">Settled days, read from dayWinner</span>
     </header>
@@ -206,11 +238,26 @@
     </div>
   </section>
 
-  <!-- ── 07 · HOW + RULES — ink band ──────────────────────── -->
+  <!-- ── 09 · ALL-TIME STATS ──────────────────────────────── -->
+  <section class="section reveal" id="stats">
+    <header class="sec-head">
+      <span class="sec-num">09</span>
+      <h2 data-i18n="statsTitle">The all-time record</h2>
+    </header>
+    <p class="panel-sub" id="statsCaption">Counting starts at launch. These numbers are read from the contract — never typed in by hand.</p>
+    <div class="stats-grid">
+      <div class="stats-cell"><span class="stat-label" data-i18n="stPaid">Paid out to winners</span><span class="stat-value mono" id="stPaid">—</span></div>
+      <div class="stats-cell"><span class="stat-label" data-i18n="stDraws">Draws settled</span><span class="stat-value mono" id="stDraws">—</span></div>
+      <div class="stats-cell"><span class="stat-label" data-i18n="stBiggest">Biggest single pool</span><span class="stat-value mono" id="stBiggest">—</span></div>
+      <div class="stats-cell"><span class="stat-label" data-i18n="stTickets">Tickets sold (from pools)</span><span class="stat-value mono" id="stTickets">—</span></div>
+    </div>
+  </section>
+
+  <!-- ── 10 · HOW + RULES — ink band ──────────────────────── -->
   <section class="band reveal" id="how">
     <div class="band-inner">
       <header class="sec-head">
-        <span class="sec-num">07</span>
+        <span class="sec-num">10</span>
         <h2 data-i18n="howTitle">How it works</h2>
       </header>
       <div class="how-grid">
@@ -245,6 +292,91 @@
     </div>
   </div>
 
+  <!-- ── 11 · VERIFY IT YOURSELF ──────────────────────────── -->
+  <section class="section reveal" id="verify">
+    <header class="sec-head">
+      <span class="sec-num">11</span>
+      <h2 data-i18n="verifyTitle">Verify it yourself</h2>
+    </header>
+    <p class="panel-sub" data-i18n="verifyNote">Don't take this page's word for anything — the contract is public, and every number on it can be checked with a block explorer or a single eth_call.</p>
+    <div class="verify-grid">
+      <div class="verify-cell">
+        <span class="stat-label" data-i18n="verifyAddrLabel">Contract address</span>
+        <p class="verify-pre" id="verifyAddrPre" data-i18n="verifyAddrPre">Published here at launch — and only ever here and on the official X (@AgentDrawBNB). An address that reaches you from anywhere else is not ours.</p>
+        <div id="verifyAddrLive" hidden>
+          <span class="mono verify-addr" id="verifyAddr"></span>
+          <span class="verify-links">
+            <a id="verifyBsc" href="#" target="_blank" rel="noopener"><span data-i18n="verifyBsc">View on BscScan</span></a>
+            · <a id="verifySourcify" href="#" target="_blank" rel="noopener"><span data-i18n="verifySourcify">Verify the source on Sourcify</span></a>
+          </span>
+        </div>
+      </div>
+      <div class="verify-cell">
+        <span class="stat-label" data-i18n="verifySeedTitle">How the winning ticket is derived</span>
+        <p class="mono verify-formula">winningTicket = keccak256(day, totalTickets, blockhash(n − 1)) mod totalTickets + 1</p>
+        <p class="small verify-seed-note" data-i18n="verifySeedNote">Computed inside settleDay() from public inputs, so anyone can recompute it after the settle transaction and confirm the winner. Transparent and tamper-evident — but not VRF-grade: the settler chooses when to call, and timing can influence the result.</p>
+      </div>
+    </div>
+    <h3 class="prompt-title" data-i18n="verifyReadsTitle">Public reads — call them yourself</h3>
+    <div class="reads-wrap">
+      <table class="reads-table mono">
+        <thead><tr><th data-i18n="verifyColFn">Function</th><th data-i18n="verifyColSel">Selector</th><th data-i18n="verifyColWhat">Returns</th></tr></thead>
+        <tbody>
+          <tr><td>poolToday()</td><td>0x17f6425b</td><td>today's prize pool, in wei</td></tr>
+          <tr><td>ticketsToday()</td><td>0xcf5ddbee</td><td>tickets sold today</td></tr>
+          <tr><td>entriesCountToday()</td><td>0x2816461d</td><td>entry chunks recorded today</td></tr>
+          <tr><td>entryAt(day, i)</td><td>0x248e08bc</td><td>chunk wallet + its cumulative tickets</td></tr>
+          <tr><td>dayTotalTickets(day)</td><td>0xeef69657</td><td>total tickets sold that day</td></tr>
+          <tr><td>dayPool(day)</td><td>0xcf637ac3</td><td>that day's prize pool, in wei</td></tr>
+          <tr><td>dayWinner(day)</td><td>0x057837d5</td><td>winner of a settled day (zero until settled)</td></tr>
+          <tr><td>dayWinningTicket(day)</td><td>0x492090e1</td><td>the winning ticket number</td></tr>
+          <tr><td>myTicketsToday(wallet)</td><td>0x374af3b9</td><td>a wallet's tickets in today's draw</td></tr>
+          <tr><td>ticketsOf(day, wallet)</td><td>0x09c79735</td><td>a wallet's tickets on a given day</td></tr>
+          <tr><td>winsOf(wallet)</td><td>0x83514ea2</td><td>lifetime draws won</td></tr>
+          <tr><td>TICKET_PRICE()</td><td>0x1a95f15f</td><td>500000000000000 wei — a fixed constant</td></tr>
+          <tr><td>OWNER_FEE_PERCENT()</td><td>0xa8a3221e</td><td>35 — a fixed constant</td></tr>
+          <tr><td>paused()</td><td>0x5c975abb</td><td>whether new entries are paused</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── 12 · FAQ ─────────────────────────────────────────── -->
+  <section class="section reveal" id="faq">
+    <header class="sec-head">
+      <span class="sec-num">12</span>
+      <h2 data-i18n="faqTitle">Questions, answered straight</h2>
+    </header>
+    <div class="faq-list">
+      <details class="faq-item"><summary data-i18n="faqQ1">Why can only Agent ID holders play?</summary><p data-i18n="faqA1">AgentDraw is built for the Binance Agent ID ecosystem: the .ai Agent ID is the entry pass, and the contract checks balanceOf on the registry (0x60B9…022F) on every enter(). One identity standard keeps the draw inside the agent economy it was made for — and the agent prompts, llms.txt and draw.json on this site are written for exactly those holders' agents.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ2">What happens if nobody calls settleDay()?</summary><p data-i18n="faqA2">Nothing is lost and nothing is stuck. The finished day's pool simply waits in the contract — settling is permissionless, so anyone (a player, an agent, you) can call settleDay() at any later time. Each call settles the oldest unsettled day, so a backlog clears one day per call until it catches up.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ3">Can the owner touch the prize pool?</summary><p data-i18n="faqA3">No. The only balance the owner can withdraw is the accumulated 35% entry fees, which are credited separately at entry. Prize pools sit in their own accounting until settleDay() pays them to the winner — the contract's invariant is balance == owner fees + unsettled prize pools, and it was proven in the test suite, including a withdraw attempt against a live pool.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ4">When exactly does the day roll over?</summary><p data-i18n="faqA4">At 00:00 UTC — 07:00 WIB. A day is the UTC day index (timestamp / 86400): tickets bought before the rollover belong to the old day, tickets after it belong to the new one. The countdown in the hero is the time left in the current day.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ5">How is the winner picked — and can it be checked?</summary><p data-i18n="faqA5">At settle, the contract derives the winning ticket as keccak256(day, totalTickets, blockhash of the block before the settle transaction) mod totalTickets, +1, then pays the wallet whose entry range contains that ticket. Anyone can recompute it after the fact and verify the winner — but be straight about the limit: this is verifiable-after-the-fact, not VRF-grade randomness, because the settler picks the moment of the call.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ6">When is the 35% fee taken?</summary><p data-i18n="faqA6">Instantly, at entry, inside the same transaction: of every 0.0005 BNB ticket, exactly 0.000175 BNB is credited to the owner's fee balance and 0.000325 BNB joins the prize pool. Nothing more is deducted at settle — the winner receives 100% of the accumulated pool. The split is a constant in the contract and cannot be changed.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ7">What happens on a day with zero entries?</summary><p data-i18n="faqA7">It settles cleanly: no winner, no payment, and the next settleDay() call moves on to the following day. An empty day costs nobody anything.</p></details>
+      <details class="faq-item"><summary data-i18n="faqQ8">How many tickets can I buy?</summary><p data-i18n="faqA8">1–20 tickets per enter() transaction, at exactly 0.0005 BNB per ticket — any other amount is rejected by the contract. There is no limit on the number of transactions: buy again as often as you like and your tickets add up in today's ranges.</p></details>
+    </div>
+  </section>
+
+  <!-- ── 13 · BUILT FOR AGENTS — ink band ─────────────────── -->
+  <section class="band agents-band reveal" id="agents">
+    <div class="band-inner">
+      <header class="sec-head">
+        <span class="sec-num">13</span>
+        <h2 data-i18n="agentsTitle">Built for agents</h2>
+      </header>
+      <p class="band-sub" data-i18n="agentsNote">AgentDraw is agent-first. The complete machine-readable spec lives on this domain — point your agent at it and it can play, settle and verify without scraping this page.</p>
+      <div class="agents-links">
+        <a class="agent-link" href="llms.txt"><span class="mono agent-path">/llms.txt</span><span data-i18n="agentsLlms">the full draw spec — facts, rules, prompts — in plain text</span></a>
+        <a class="agent-link" href="draw.json"><span class="mono agent-path">/draw.json</span><span data-i18n="agentsJson">facts, selectors and copy-ready prompts as structured JSON</span></a>
+        <span class="agent-link inert"><span class="mono agent-path">ClawHub</span><span data-i18n="agentsClawhub">ClawHub skill — published at launch</span></span>
+      </div>
+      <p class="agents-enter"><span data-i18n="agentsEnterLabel">The whole game, in one line:</span></p>
+      <p class="mono agents-line">enter(n) · selector 0xa59f3e0c · value = n × 500000000000000 wei · gasLimit 300000</p>
+    </div>
+  </section>
+
 </main>
 
 <!-- ── FOOTER — ink ───────────────────────────────────────── -->
@@ -265,6 +397,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=3"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>
