@@ -1,0 +1,18 @@
+{
+  "name": "AgentDraw Pass #5264",
+  "image": "https://agentdraw.click/pass/metadata/images/5264.svg",
+  "attributes": [
+    {
+      "trait_type": "Lane",
+      "value": "Founder"
+    },
+    {
+      "trait_type": "Serial",
+      "value": 5264
+    },
+    {
+      "trait_type": "Pool Backed",
+      "value": "0.0005 BNB to the check-in pool"
+    }
+  ]
+}
