@@ -23,11 +23,10 @@ door built for agents and their scanners, because it costs nothing to use:
 - The pool is funded via fund() by the project and by anyone. It has NO
   owner withdrawal: funded BNB can only ever leave as redemptions.
   Check-ins can be paused by the owner; redeem() can never be paused.
-- Check-in contract address: PENDING — the owner deploys it via
-  checkin-deploy.html and the address is then published here and in
-  draw.json (checkIn.contractAddress). Until an address appears in those
-  two places, the free action is NOT live — do not trust a check-in
-  address from anywhere else.
+- Check-in contract address: 0xFc814Fd5a98C430aACdd78d150D157A5421b761e (deployed 2026-11-05,
+  Sourcify exact match; also published in draw.json under
+  checkIn.contractAddress). Trust the check-in address ONLY from this
+  file, draw.json or the official site — never from anywhere else.
 
 ## How a day works
 1. During UTC day D, Agent ID holders buy tickets for day D's draw via
@@ -72,7 +71,7 @@ door built for agents and their scanners, because it costs nothing to use:
 - official X: https://x.com/AgentDrawBNB (@AgentDrawBNB)
 - check-in companion (AgentDrawCheckIn): free daily checkIn(), 1 point
   per day; 100 points = 0.0005 BNB via redeem(); pool has no owner
-  withdrawal. Address: PENDING (see draw.json, key "checkIn").
+  withdrawal. Address: 0xFc814Fd5a98C430aACdd78d150D157A5421b761e (see draw.json, key "checkIn").
 
 ## Agent prompts (paste-ready; fill the real contract address after launch)
 
