@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgentDraw — The Daily On-Chain Draw for Binance Agent ID Holders</title>
-<meta name="description" content="A daily on-chain draw on BNB Chain for Binance .ai Agent ID holders. Buy a ticket for 0.0005 BNB — 65% of every ticket forms today's prize pool and one winning ticket takes the whole pool at the 00:00 UTC settle. No NFT — just tickets.">
+<meta name="description" content="A daily on-chain draw on BNB Chain for Binance .ai Agent ID holders. Buy a ticket for 0.0005 BNB — 65% of every ticket forms today's prize pool and one winning ticket takes the whole pool at the 00:00 UTC settle. The draw is ticket-only — with a free daily check-in and an optional Pass NFT companion.">
 <meta property="og:title" content="AgentDraw — The Daily On-Chain Draw for Binance Agent ID Holders">
-<meta property="og:description" content="One draw. Every day. Tickets 0.0005 BNB for Binance Agent ID holders — 65% of every ticket forms the prize pool and the winner takes the whole pool at the 00:00 UTC settle. No NFT.">
+<meta property="og:description" content="One draw. Every day. Tickets 0.0005 BNB for Binance Agent ID holders — 65% of every ticket forms the prize pool and the winner takes the whole pool at the 00:00 UTC settle. Plus a free daily check-in and the AgentDraw Pass NFT.">
 <meta property="og:type" content="website">
 <!-- OG IMAGE: uploaded by the owner via GitHub web on 2026-11-05 under this
      exact filename ("AgentDraw OG card.png" — the connector cannot push
@@ -52,7 +52,7 @@
         <p class="hero-sub" data-i18n-html="heroSub">
           The daily on-chain draw for <b>Binance .ai Agent ID</b> holders on BNB Chain.
           Buy tickets for <b>0.0005 BNB</b> each — <b>65% of every ticket</b> forms <b>today's prize pool</b> —
-          and after <b>00:00 UTC</b> one winning ticket takes <b>the whole pool</b>. No NFT, just tickets.
+          and after <b>00:00 UTC</b> one winning ticket takes <b>the whole pool</b>. Plus a free daily check-in and the optional AgentDraw Pass NFT.
         </p>
         <div class="pool-block">
           <span class="stat-label" data-i18n="statPool">Today's prize pool</span>
@@ -89,8 +89,8 @@
   <!-- ── Ticker ───────────────────────────────────────────── -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
-      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · Free daily check-in · AgentDraw Pass NFT live · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · Free daily check-in · AgentDraw Pass NFT live · One winning ticket takes the pool ·&nbsp;</span>
     </div>
   </div>
 
@@ -343,7 +343,7 @@
       </header>
       <ol class="rules-list">
         <li data-i18n-html="rule1"><b>Who can play.</b> Your wallet must hold a Binance .ai Agent ID (the SPACE ID .ai NFT at <span class="mono small">0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F</span>). The contract checks this on every <span class="mono">enter()</span>.</li>
-        <li data-i18n-html="rule2"><b>Tickets.</b> One ticket costs exactly <b>0.0005 BNB</b> — a constant in the contract that nobody can change. Buy <b>1–20 tickets per transaction</b>; repeat buys are allowed and your tickets add up. There is no NFT and nothing to approve.</li>
+        <li data-i18n-html="rule2"><b>Tickets.</b> One ticket costs exactly <b>0.0005 BNB</b> — a constant in the contract that nobody can change. Buy <b>1–20 tickets per transaction</b>; repeat buys are allowed and your tickets add up. The draw itself is not an NFT and needs no approvals.</li>
         <li data-i18n-html="rule3"><b>The split.</b> Every ticket is split at entry: <b>65%</b> forms that UTC day's prize pool and <b>35%</b> is the project fee, credited to the owner instantly inside the same transaction. Tickets belong to the day they were bought on — they do not carry over, and yesterday's tickets never enter today's draw.</li>
         <li data-i18n-html="rule4"><b>The draw.</b> After the day ends at <b>00:00 UTC</b>, anyone can call <span class="mono">settleDay()</span>. One ticket index is drawn from the day's range; the wallet whose entry range contains it wins <b>the entire prize pool</b> — the accumulated 65% shares of that day's tickets — paid automatically. Nothing more is deducted at settle: the fee was already taken at entry.</li>
         <li data-i18n-html="rule5"><b>How the winner is picked — honestly.</b> The winning index is derived from a hash of the day, the day's total tickets and the hash of the block right before the settle transaction. Anyone can recompute it after the settle and verify the winner. It is transparent and tamper-evident, but it is <b>not</b> VRF-grade randomness: a settler chooses when to call, and timing can influence the result. Play with amounts whose loss you can shrug off.</li>
@@ -357,8 +357,8 @@
   <!-- ── Ticker ───────────────────────────────────────────── -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
-      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · Free daily check-in · AgentDraw Pass NFT live · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · Free daily check-in · AgentDraw Pass NFT live · One winning ticket takes the pool ·&nbsp;</span>
     </div>
   </div>
 
@@ -467,6 +467,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
