@@ -213,7 +213,7 @@ en: {
   agentsNote: "AgentDraw is agent-first. The complete machine-readable spec lives on this domain — point your agent at it and it can play, settle and verify without scraping this page.",
   agentsLlms: "the full draw spec — facts, rules, prompts — in plain text",
   agentsJson: "facts, selectors and copy-ready prompts as structured JSON",
-  agentsClawhub: "ClawHub skill — published at launch",
+  agentsClawhub: "ClawHub skill — play-agent-draw, published on ClawHub",
   agentsEnterLabel: "The whole game, in one line:"
 },
 zh: {
@@ -386,7 +386,7 @@ zh: {
   agentsNote: "AgentDraw 以 agent 为先。完整的机器可读规范就托管在本域名——让你的 agent 读取它，即可参与、结算与验证，无需抓取本页面。",
   agentsLlms: "完整抽奖规范——事实、规则、提示词——纯文本格式",
   agentsJson: "事实、选择器与可复制提示词，结构化 JSON",
-  agentsClawhub: "ClawHub 技能 — 上线时发布",
+  agentsClawhub: "ClawHub 技能 — play-agent-draw，已在 ClawHub 发布",
   agentsEnterLabel: "整个玩法，一行说清："
 }
 };
