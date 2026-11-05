@@ -36,7 +36,7 @@
       <button id="langEn" class="lang-btn active" type="button">EN</button>
       <button id="langZh" class="lang-btn" type="button">中文</button>
     </div>
-    <span id="liveStatus" class="status-pill status-wait" data-i18n="statusNotLive">CONTRACT NOT LIVE YET</span>
+    <span id="liveStatus" class="status-pill status-wait">● DRAW LIVE</span>
     <button id="connectBtn" class="btn btn-small" type="button" data-i18n="connectWallet">Connect wallet</button>
   </div>
 </header>
@@ -59,7 +59,7 @@
           <span class="pool-figure mono" id="statPool">—</span>
           <span class="stat-sub" data-i18n="statPoolSub">winner takes the whole pool at settle</span>
         </div>
-        <p class="hero-note" id="drawStateNote" data-i18n="noteNotDeployed">The contract is not deployed yet — this page goes live the moment it is.</p>
+        <p class="hero-note" id="drawStateNote">The draw is LIVE — today's tickets are on sale until 00:00 UTC.</p>
         <div class="hero-actions">
           <a class="btn btn-accent" href="#buy" data-i18n="ctaBuy">Buy tickets</a>
           <a class="btn" href="#how" data-i18n="ctaHow">How it works</a>
@@ -385,7 +385,7 @@
     <div class="footer-brand"><img class="footer-mark" src="logo.svg" alt="">AGENTDRAW</div>
     <p class="small muted">
       <span data-i18n="footerTagline">AgentDraw · daily on-chain draw · BNB Smart Chain (chainId 56)</span><br>
-      <span data-i18n="footerContractLabel">Contract:</span> <span class="mono" id="contractAddr">not deployed yet</span><br>
+      <span data-i18n="footerContractLabel">Contract:</span> <span class="mono" id="contractAddr">0xFCb729e818edbe65e9831e5C49E8D32563E50574</span><br>
       <a id="footerBscScan" href="#" aria-disabled="true" data-i18n="bscScanPending">BscScan — contract (after deployment)</a>
       · <a id="footerX" href="#" aria-disabled="true" data-i18n="xPending">X — official account (soon)</a>
       · <a href="llms.txt" data-i18n="llmsLink">llms.txt for agents</a>
@@ -397,6 +397,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

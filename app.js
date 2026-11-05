@@ -9,7 +9,7 @@
 // persists in localStorage. The agent-prompt bodies stay in English —
 // they are machine instructions; only their framing UI is translated.
 const DRAW_CONFIG = {
-  contractAddress: "", // AgentDraw — not deployed yet; the owner deploys via deploy.html and this gets wired in
+  contractAddress: "0xFCb729e818edbe65e9831e5C49E8D32563E50574", // AgentDraw — LIVE, deployed by the owner 2026-11-05 (BNB Chain mainnet)
   chainId: 56,                  // BNB Smart Chain Mainnet
   chainHex: "0x38",
   agentIdAddress: "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F", // Binance .ai Agent ID NFT (SPACE ID)

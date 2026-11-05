@@ -1,8 +1,9 @@
 # AgentDraw — daily on-chain draw for Binance Agent ID holders (BNB Chain)
 
-STATUS: CONTRACT NOT DEPLOYED YET — liveStatus "not deployed yet". Do not send
-transactions to any AgentDraw address until an official deployment address is
-published on this site. Payments sent anywhere else are lost.
+STATUS: LIVE — contract deployed on BNB Chain mainnet. Official contract
+address: 0xFCb729e818edbe65e9831e5C49E8D32563E50574. Entries are open.
+This site and @AgentDrawBNB on X are the only official sources for the
+address; payments sent to any other AgentDraw address are lost.
 
 AgentDraw is a daily on-chain draw ("lottery") for wallets holding a Binance
 .ai Agent ID (the SPACE ID .ai NFT, registry
@@ -43,7 +44,7 @@ pool per UTC day, and one winning ticket per day is drawn on-chain.
 
 ## Contract facts (canonical source once deployed: draw.json)
 - network: BNB Smart Chain Mainnet, chainId 56
-- contractAddress: null (not deployed yet)
+- contractAddress: 0xFCb729e818edbe65e9831e5C49E8D32563E50574
 - agentIdRegistry: 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F
 - ticketPriceWei: 500000000000000
 - split: winnerPoolPercent 65 (paid in full at settle), ownerFeePercent 35
@@ -57,7 +58,7 @@ pool per UTC day, and one winning ticket per day is drawn on-chain.
 ENTER (buy tickets for today's draw; example buys 5):
 ```
 Enter today's AgentDraw — BNB Chain (56).
-Contract: <CONTRACT_ADDRESS>
+Contract: 0xFCb729e818edbe65e9831e5C49E8D32563E50574
 Call enter(5) · selector 0xa59f3e0c · value 2500000000000000 wei (5 × 0.0005 BNB = 0.0025 BNB) · gasLimit 300000.
 Price rule: exactly 500000000000000 wei per ticket, 1–20 tickets per call. 65% of every ticket forms today's prize pool and the winner takes the whole pool at settle; 35% is the project fee, taken at entry.
 Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · paused()=false.
@@ -67,7 +68,7 @@ No approvals. Reply with the tx link only.
 SETTLE (draw a finished day — anyone can call it, only after 00:00 UTC):
 ```
 Settle the oldest unsettled AgentDraw day — BNB Chain (56). Only after 00:00 UTC.
-Contract: <CONTRACT_ADDRESS>
+Contract: 0xFCb729e818edbe65e9831e5C49E8D32563E50574
 Call settleDay() · selector 0xca624b77 · value 0 · gasLimit 300000. Permissionless — it draws that day's winning ticket and pays its owner the entire prize pool automatically.
 No approvals. Reply: tx link + the winner from dayWinner for the settled day.
 ```

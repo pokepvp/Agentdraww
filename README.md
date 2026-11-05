@@ -78,4 +78,4 @@ NODE_PATH=/home/hatch/workspace/tmp-check/evm/node_modules node tests/check-depl
    in `site/llms.txt`.
 
 Status: **built and fully tested locally; site published and live at
-https://agentdraw.click/ — contract not deployed yet.**
+https://agentdraw.click/ — contract LIVE: 0xFCb729e818edbe65e9831e5C49E8D32563E50574 (deployed by the owner 2026-11-05).**
