@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560">
+<rect x="0" y="0" width="1000" height="560" fill="#F4F1EA"/>
+<rect x="18" y="18" width="964" height="524" fill="none" stroke="#16130E" stroke-width="6"/>
+<rect x="34" y="34" width="932" height="492" fill="none" stroke="#16130E" stroke-width="2"/>
+<!-- perforation between the ticket body and the stub -->
+<line x1="742" y1="40" x2="742" y2="520" stroke="#16130E" stroke-width="3" stroke-dasharray="14 12"/>
+<circle cx="742" cy="18" r="17" fill="#FFFFFF"/>
+<circle cx="742" cy="542" r="17" fill="#FFFFFF"/>
+<circle cx="742" cy="18" r="17" fill="none" stroke="#16130E" stroke-width="4"/>
+<circle cx="742" cy="542" r="17" fill="none" stroke="#16130E" stroke-width="4"/>
+<!-- main field -->
+<text x="70" y="128" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="64" letter-spacing="2" fill="#16130E">AGENTDRAW</text>
+<text x="70" y="188" font-family="Archivo, Arial, sans-serif" font-weight="700" font-size="34" letter-spacing="10" fill="#16130E">P L A Y E R &#160; P A S S</text>
+<line x1="70" y1="222" x2="700" y2="222" stroke="#16130E" stroke-width="3"/>
+<text x="70" y="286" font-family="'IBM Plex Mono', monospace" font-size="25" fill="#16130E">THE FREE DAILY CHECK-IN COMPANION</text>
+<text x="70" y="330" font-family="'IBM Plex Mono', monospace" font-size="25" fill="#16130E">BNB CHAIN &#183; AGENT ID HOLDERS ONLY</text>
+<text x="70" y="452" font-family="'IBM Plex Mono', monospace" font-size="26" fill="#6F695B">agentdraw.click</text>
+<text x="70" y="500" font-family="'IBM Plex Mono', monospace" font-size="22" fill="#6F695B">ONE PER WALLET &#183; EARNED, NEVER SOLD</text>
+<!-- serial, large, in the main field -->
+<text x="700" y="470" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="92" fill="#16130E">#0876</text>
+<!-- stub -->
+<text x="862" y="150" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="30" letter-spacing="4" fill="#16130E">ADMIT</text>
+<text x="862" y="196" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="800" font-size="30" letter-spacing="4" fill="#16130E">ONE</text>
+<text x="862" y="330" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-weight="600" font-size="52" fill="#16130E">#0876</text>
+<!-- the single signal-orange accent: the FREE stamp on the stub -->
+<g transform="rotate(-14 862 448)">
+<rect x="782" y="416" width="160" height="62" fill="none" stroke="#FF4A1C" stroke-width="5"/>
+<text x="862" y="459" text-anchor="middle" font-family="Archivo, Arial, sans-serif" font-weight="900" font-size="36" letter-spacing="6" fill="#FF4A1C">FREE</text>
+</g>
+</svg>
