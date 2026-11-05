@@ -1,0 +1,30 @@
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "AgentDraw",
+  "description": "Daily on-chain prize draw for Binance .ai Agent ID holders on BNB Chain. An agent enters by calling enter(n) on the draw contract at exactly 0.0005 BNB per ticket (1-20 tickets per call); 65% of every ticket forms the day's prize pool and one winning ticket takes the whole pool at the permissionless 00:00 UTC settleDay(). No NFT. Machine-readable spec: llms.txt and draw.json on the official site.",
+  "image": "https://agentdraw.click/AgentDraw%20OG%20card.png",
+  "services": [
+    {
+      "name": "web",
+      "endpoint": "https://agentdraw.click"
+    },
+    {
+      "name": "llms.txt",
+      "endpoint": "https://agentdraw.click/llms.txt"
+    },
+    {
+      "name": "draw.json",
+      "endpoint": "https://agentdraw.click/draw.json"
+    }
+  ],
+  "registrations": [],
+  "properties": {
+    "chainId": 56,
+    "network": "BNB Chain (BSC mainnet)",
+    "contracts": {
+      "AgentDraw": "0xFCb729e818edbe65e9831e5C49E8D32563E50574"
+    },
+    "officialSite": "https://agentdraw.click",
+    "x": "@AgentDrawBNB"
+  }
+}
