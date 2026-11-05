@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentDraw Pass — Deploy Console (Owner)</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#F4F1EA; --paper-2:#ECE7DB; --card:#FBF9F3; --ink:#16130E; --ink-soft:#3B362B; --muted:#6F695B; --line:#D9D3C3; --accent:#FF4A1C; --accent-deep:#C9330E; --sage:#6C7247; --danger:#B3261E; --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background:var(--paper); color:var(--ink); }
+  .wrap{ max-width:880px; margin:0 auto; padding:34px 18px 90px; }
+  header{ display:flex; align-items:center; gap:14px; }
+  header img{ width:46px; height:46px; }
+  h1{ margin:0; font-family:"Archivo", sans-serif; font-weight:900; font-size:26px; letter-spacing:.2px; }
+  .sub{ color:var(--muted); margin:4px 0 0; font-size:14px; }
+  .step{ background:var(--card); border:2px solid var(--ink); padding:20px; margin-top:18px; }
+  .step h2{ margin:0 0 8px; font-family:"Archivo", sans-serif; font-weight:800; font-size:18px; }
+  .step p{ color:var(--ink-soft); font-size:14px; line-height:1.55; margin:0 0 12px; }
+  .mono{ font-family:var(--mono); font-size:12.5px; word-break:break-all; }
+  .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  button{ appearance:none; border:2px solid var(--ink); padding:12px 18px; font-weight:700; font-size:15px; cursor:pointer; background:var(--card); color:var(--ink); font-family:inherit; }
+  button:hover{ box-shadow:4px 4px 0 var(--ink); transform:translate(-2px,-2px); }
+  button:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; transform:none; }
+  button.accent{ background:var(--accent); color:var(--paper); }
+  button.danger{ background:transparent; color:var(--danger); border-color:var(--danger); }
+  input[type=text]{ width:100%; background:#fff; border:2px solid var(--ink); padding:11px 12px; color:var(--ink); font-family:var(--mono); font-size:13px; }
+  input[type=text]:focus{ outline:none; border-color:var(--accent); }
+  label{ display:block; font-size:13px; color:var(--ink-soft); margin:0 0 6px; font-weight:600; }
+  .warn{ display:none; margin-top:10px; padding:10px 12px; border:2px solid var(--danger); color:var(--danger); font-size:13.5px; line-height:1.5; background:#fff; }
+  .status{ font-size:13.5px; color:var(--muted); margin-top:10px; min-height:20px; line-height:1.5; }
+  .kv{ display:grid; grid-template-columns:210px 1fr; gap:6px 14px; font-size:13.5px; margin-top:6px; }
+  .kv dt{ color:var(--muted); } .kv dd{ margin:0; }
+  textarea{ width:100%; min-height:210px; background:#fff; color:var(--ink); border:2px solid var(--ink); padding:14px; font-family:var(--mono); font-size:12.5px; line-height:1.6; }
+  .ok{ color:var(--sage); font-weight:700; } .bad{ color:var(--danger); }
+  footer{ color:var(--muted); font-size:12.5px; margin-top:26px; line-height:1.6; }
+  a{ color:var(--accent-deep); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo.svg" alt="AgentDraw logo">
+    <div>
+      <h1>AgentDraw Pass — Deploy Console (Owner)</h1>
+      <p class="sub">The NFT companion to AgentDraw · BNB Smart Chain (chainId 56) · This page is the owner's tool — it is not linked from the public site.</p>
+    </div>
+  </header>
+
+  <section class="step" id="step1">
+    <h2>01 — Connect owner wallet</h2>
+    <p>Connect the wallet that will own the Pass contract. The page switches it to BNB Smart Chain automatically. The connected wallet becomes <b>owner</b> at deployment: it can open/close the mint, pause mints, set the base URI (only before the first mint) and withdraw the owner half of Founder mints. It can <b>never</b> touch the half that goes to the check-in pool — that half leaves inside the mint transaction itself.</p>
+    <div class="row"><button id="connectBtn" class="accent">Connect wallet</button><span class="status" id="connectStatus">Not connected.</span></div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2>02 — Deploy AgentDrawPass</h2>
+    <p>Deploys the Pass NFT (ERC-721, <b>AgentDraw Pass / ADPASS</b>). Both constructor arguments are prefilled with the live mainnet contracts and guarded — do not change them. The economics are constants in the code and can never change: <b>Player Pass</b> free (IDs 1–2222, needs an Agent ID + 1 check-in point), <b>Founder Pass</b> exactly 0.001 BNB (IDs 5001–5500), of which <b>0.0005 BNB goes to the check-in pool</b> and 0.0005 BNB to the owner balance, enforced inside every mint.</p>
+    <label for="registryInput">Agent ID registry (constructor argument 1)</label>
+    <input type="text" id="registryInput" value="0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F" spellcheck="false">
+    <div class="warn" id="registryWarn">⚠️ This is NOT the official Binance Agent ID registry (0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F). Double-check before deploying — a wrong registry means the mint gate checks the wrong NFT, and constructor arguments cannot be changed afterwards.</div>
+    <label for="checkinInput" style="margin-top:12px">AgentDrawCheckIn companion (constructor argument 2)</label>
+    <input type="text" id="checkinInput" value="0xFc814Fd5a98C430aACdd78d150D157A5421b761e" spellcheck="false">
+    <div class="warn" id="checkinWarn">⚠️ This is NOT the live AgentDrawCheckIn companion (0xFc814Fd5a98C430aACdd78d150D157A5421b761e). With a wrong address the points gate reads the wrong contract and the Founder pool share would be sent to the wrong place. Constructor arguments cannot be changed afterwards.</div>
+    <div class="row" style="margin-top:14px"><button id="deployBtn" class="accent" disabled>Deploy AgentDrawPass</button><span class="status" id="deployStatus">Waiting for a wallet connection.</span></div>
+    <dl class="kv" id="contractKv" style="display:none">
+      <dt>Contract</dt><dd class="mono" id="kvContract">—</dd>
+      <dt>Registry (agentId)</dt><dd class="mono" id="kvRegistry">—</dd>
+      <dt>Check-in (checkIn)</dt><dd class="mono" id="kvCheckIn">—</dd>
+      <dt>Owner</dt><dd class="mono" id="kvOwner">—</dd>
+      <dt>FOUNDER_PRICE()</dt><dd id="kvPrice">—</dd>
+      <dt>Supplies</dt><dd id="kvSupplies">—</dd>
+      <dt>mintOpen()</dt><dd id="kvMintOpen">—</dd>
+    </dl>
+  </section>
+
+  <section class="step" id="step3">
+    <h2>03 — Set the metadata base URI</h2>
+    <p>Points <span class="mono">tokenURI</span> at the published metadata (<span class="mono">baseURI + tokenId + ".json"</span>). The artwork and JSON for all 2,722 passes are already generated and pushed under <span class="mono">/pass/metadata/</span>. <b>Do this before opening the mint:</b> the base URI locks forever at the first mint of either lane and can never be repointed afterwards.</p>
+    <label for="baseUriInput">Base URI</label>
+    <input type="text" id="baseUriInput" value="https://agentdraw.click/pass/metadata/" spellcheck="false">
+    <div class="row" style="margin-top:14px"><button id="baseUriBtn" class="accent" disabled>Set base URI — setBaseURI()</button><span class="status" id="baseUriStatus"></span></div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2>04 — Open the mint</h2>
+    <p>The mint starts <b>closed</b>. Open it only after the base URI is set (step 03) and the metadata is live. Both lanes open together, in parallel — the paid lane is never gated behind the free lane. Pause is an emergency brake for mints only; transfers and withdrawals keep working while paused.</p>
+    <div class="row"><button id="openBtn" class="accent" disabled>Open mint — setMintOpen(true)</button><button id="closeBtn" disabled>Close mint</button><span class="status" id="openStatus"></span></div>
+    <div class="row" style="margin-top:10px"><button id="pauseBtn" class="danger" disabled>Pause mints</button><button id="unpauseBtn" disabled>Unpause mints</button><span class="status" id="pauseStatus"></span></div>
+  </section>
+
+  <section class="step" id="step5">
+    <h2>05 — State, withdraw + summary</h2>
+    <p>Live state of the Pass contract. The owner balance is exactly the owner half of Founder mints (the pool half already left at mint time — it is not here and cannot be withdrawn). Then copy the summary box and send it to Muse to wire the Pass section into the public site and the ClawHub skill.</p>
+    <dl class="kv">
+      <dt>Player minted</dt><dd id="kvPlayer">—</dd>
+      <dt>Founder minted</dt><dd id="kvFounder">—</dd>
+      <dt>Owner balance</dt><dd id="kvOwnerBal">—</dd>
+      <dt>mintOpen / paused</dt><dd id="kvFlags">—</dd>
+      <dt>baseURI</dt><dd class="mono" id="kvBaseUri">—</dd>
+    </dl>
+    <div class="row" style="margin:12px 0"><button id="refreshBtn" disabled>Refresh state</button><button id="withdrawBtn" disabled>Withdraw owner balance — withdraw()</button><span class="status" id="stateStatus"></span></div>
+    <label for="summaryBox">AgentDrawPass deployment summary — send this to Muse</label>
+    <textarea id="summaryBox" readonly>Connect the owner wallet and deploy (step 02) — the summary fills itself in here.</textarea>
+    <div class="row" style="margin-top:10px"><button id="copySummaryBtn">Copy summary</button></div>
+  </section>
+
+  <footer>
+    Tool page for the project owner. Bytecode and ABI embedded below are generated from the compiled build artifacts
+    (contracts/AgentDrawPass.sol, solc 0.8.26, paris + viaIR, optimizer 200 runs) and verified byte-identical at build time.
+    Deploying spends real BNB from the connected wallet — Muse never signs anything.
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+const EXPECTED_REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
+const EXPECTED_CHECKIN = "0xFc814Fd5a98C430aACdd78d150D157A5421b761e";
+const CHAIN_ID = 56, CHAIN_HEX = "0x38";
+const CREATION_HEX = "0x60c0346101bb57601f61231c38819003918201601f19168301916001600160401b038311848410176101c05780849260409485528339810103126101bb57610052602061004b836101d6565b92016101d6565b9061005e6000546101ea565b601f8111610172575b507f4167656e7444726177205061737300000000000000000000000000000000001c600055600154610098906101ea565b601f8111610128575b50600c6541445041535360d01b016001556002546100c96001600160a01b0383161515610224565b6100dd6001600160a01b0384161515610224565b6001600160b01b031916331760025560805260a0526040516120bc908161026082396080518181816105880152611d23015260a05181818161030d015281816113b40152611dc20152f35b6001600052601f0160051c7fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6908101905b81811061016657506100a1565b60008155600101610159565b60008052601f0160051c7f290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563908101905b8181106101af5750610067565b600081556001016101a2565b600080fd5b634e487b7160e01b600052604160045260246000fd5b51906001600160a01b03821682036101bb57565b90600182811c9216801561021a575b602083101461020457565b634e487b7160e01b600052602260045260246000fd5b91607f16916101f9565b1561022b57565b60405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606490fdfe608080604052600436101561001357600080fd5b600090813560e01c90816301ffc9a7146115ea5750806306fdde0314611562578063081812fc14611511578063095ea7b31461145b57806316c38b3c146113e3578063183ff0851461139e57806323b872dd14611386578063246593181461136857806324bbd049146113425780632a7f0b0114610d5d578063396ad1d7146113255780633ccfd60b146112075780633f39778b1461107957806342842e0e1461104157806347e7d6611461102357806355f804b314610dc25780635c975abb14610d9c5780635e93496114610d5d5780636352211e14610d2c5780636ac924a214610d0a5780636c0360eb14610c7557806370a0823114610c315780638462151c14610b7c57806387df9cb714610ae05780638da5cb5b14610ab757806395d89b41146109e8578063a22cb4651461095d578063a2309ff814610933578063a8a88e4e14610906578063a9a22fdc1461084d578063b88d4fde146107b0578063ba617e7214610753578063bedcf00314610792578063c35d4c4a14610753578063c87b56dd14610632578063c932b57714610615578063d3a5902d146105d4578063de13781f146105b7578063e84f43b714610572578063e985e9c514610522578063f8004d31146104aa578063fbb954581461021e5763fed5793f146101fa57600080fd5b3461021b578060031936011261021b57602060405166038d7ea4c680008152f35b80fd5b508060031936011261021b5761024a60ff600254610240828260a01c16611b2e565b60a81c1615611b6b565b61025b61025633611cf9565b611ba5565b66038d7ea4c68000340361046e57338152600660205260ff604082205416610429576101f460045410156103ee57338152600660205260408120600160ff198254161790556102ab600454611be5565b806004556113880180611388116103da576102c68133611e25565b6007546601c6bf5263400081018091116103c65760075580604051600181527ff9188ffd3cfd4a7ac11288813d10332eba8da184d1dea52c64fc04bfa6027efe60203392a37f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316803b156103c25791806601c6bf52634000936004604051809681936316c1a85160e31b83525af19283156103b5576020936103a5575b50507fd20389ec208fde395624b8221fa1cae9211e46a6ba77134c8e0b1af8c9603398826040516601c6bf526340008152a1604051908152f35b816103af91611691565b3861036b565b50604051903d90823e3d90fd5b8280fd5b634e487b7160e01b83526011600452602483fd5b634e487b7160e01b82526011600452602482fd5b60405162461bcd60e51b81526020600482015260136024820152722337bab73232b91039bab838363c9037bb32b960691b6044820152606490fd5b60405162461bcd60e51b815260206004820152601b60248201527f466f756e646572205061737320616c7265616479206d696e74656400000000006044820152606490fd5b60405162461bcd60e51b8152602060048201526014602482015273115e1858dd081c1c9a58d9481c995c5d5a5c995960621b6044820152606490fd5b503461021b57602036600319011261021b577f0b4905c1ec70314aeecbb4133671ed6652620ca58efea74ec87000eceec8d98560206104e7611742565b600254906104ff336001600160a01b03841614611836565b15159060ff60a01b8260a01b169060ff60a01b191617600255604051908152a180f35b503461021b57604036600319011261021b5760ff6040602092610543611711565b61054b61172c565b6001600160a01b039182168352600c86528383209116825284522054604051911615158152f35b503461021b578060031936011261021b576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b503461021b578060031936011261021b5760206040516113888152f35b503461021b578060031936011261021b576003546108ae03906108ae821161060157602082604051908152f35b634e487b7160e01b81526011600452602490fd5b503461021b578060031936011261021b5760206040516101f48152f35b503461021b57602036600319011261021b5760043580825260096020526040822054610672919061066d906001600160a01b031615156117b9565b611f9e565b9060405190806008549061068582611657565b916001811690811561072d57506001146106ea575b6106e6846106d26005826020886106b78c828151948592016116c9565b0164173539b7b760d91b815203601a19810184520182611691565b6040519182916020835260208301906116ec565b0390f35b909150600881526000805160206120678339815191525b828210610717575050810160200160058261069a565b6001816020925483858801015201910190610701565b60ff1916602080870191909152831515909302850190920192506005915083905061069a565b503461021b57602036600319011261021b5760209060ff906040906001600160a01b0361077e611711565b168152600684522054166040519015158152f35b503461021b578060031936011261021b576020600754604051908152f35b503461021b57608036600319011261021b576107ca611711565b6107d261172c565b906044359060643567ffffffffffffffff8111610849576107f790369060040161178b565b92909361080582828561186e565b61080e84611b12565b9261081c6040519485611691565b84845286368688011161021b5760208661084197610846998389013786010152611ec9565b611bf4565b80f35b8480fd5b503461021b57602036600319011261021b5760209061086a611711565b6002549160ff8360a01c1692836108f7575b50826108d6575b50816108c7575b816108b6575b816108a1575b506040519015158152f35b600191506108ae90611d98565b101538610896565b90506108c181611cf9565b90610890565b90506108ae600354109061088a565b6001600160a01b038216815260058452604090205460ff1615915038610883565b60a81c60ff161592503861087c565b503461021b578060031936011261021b576004546101f403906101f4821161060157602082604051908152f35b503461021b578060031936011261021b57602061095560035460045490611c33565b604051908152f35b503461021b57604036600319011261021b57610977611711565b602435908115158092036103c257338352600c6020526040832060018060a01b03821684526020526040832060ff1981541660ff841617905560405191825260018060a01b0316907f17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c3160203392a380f35b503461021b578060031936011261021b57604051908060015490610a0b82611657565b8085529160018116908115610a905750600114610a33575b6106e6846106d281860382611691565b600181527fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6939250905b808210610a76575090915081016020016106d282610a23565b919260018160209254838588010152019101909291610a5d565b60ff191660208087019190915292151560051b850190920192506106d29150839050610a23565b503461021b578060031936011261021b576002546040516001600160a01b039091168152602090f35b503461021b57602036600319011261021b57602090610afd611711565b6002549160ff8360a01c169283610b6d575b5082610b4c575b5081610b3d575b81610b2d57506040519015158152f35b610b379150611cf9565b38610896565b90506101f46004541090610b1d565b6001600160a01b038216815260068452604090205460ff1615915038610b16565b60a81c60ff1615925038610b0f565b503461021b57602036600319011261021b576001600160a01b03610b9e611711565b168152600d60205260408120604051908160208254918281520190819285526020852090855b818110610c1b5750505082610bda910383611691565b604051928392602084019060208552518091526040840192915b818110610c02575050500390f35b8251845285945060209384019390920191600101610bf4565b8254845260209093019260019283019201610bc4565b503461021b57602036600319011261021b576020906040906001600160a01b03610c59611711565b16610c65811515611c66565b8152600a83522054604051908152f35b503461021b578060031936011261021b57604051908060085490610c9882611657565b8085529160018116908115610a905750600114610cbf576106e6846106d281860382611691565b60088152600080516020612067833981519152939250905b808210610cf0575090915081016020016106d282610a23565b919260018160209254838588010152019101909291610cd7565b503461021b578060031936011261021b5760206040516601c6bf526340008152f35b503461021b57602036600319011261021b576020610d4b600435611c40565b6040516001600160a01b039091168152f35b503461021b57602036600319011261021b5760209060ff906040906001600160a01b03610d88611711565b168152600584522054166040519015158152f35b503461021b578060031936011261021b57602060ff60025460a81c166040519015158152f35b503461021b57602036600319011261021b5760043567ffffffffffffffff811161101f57610df490369060040161178b565b90610e0a60018060a01b03600254163314611836565b610e1960035460045490611c33565b610fda5767ffffffffffffffff8211610fc657610e37600854611657565b601f8111610f5b575b5082601f8311600114610ec75782917ff9c7803e94e0d3c02900d8a90893a6d5e90dd04d32a4cfe825520f82bf9f32f6936040928691610ebc575b508360011b906000198560031b1c1916176008555b82825193849260208452816020850152848401378181018301869052601f01601f19168101030190a180f35b905081013538610e7b565b6008845260008051602061206783398151915290601f198416855b818110610f435750918493917ff9c7803e94e0d3c02900d8a90893a6d5e90dd04d32a4cfe825520f82bf9f32f69560409410610f29575b5050600183811b01600855610e90565b820135600019600386901b60f8161c191690553880610f19565b91926020600181928688013581550194019201610ee2565b60088452601f830160051c600080516020612067833981519152019060208410610fb0575b601f0160051c60008051602061206783398151915201905b818110610fa55750610e40565b848155600101610f98565b6000805160206120678339815191529150610f80565b634e487b7160e01b83526041600452602483fd5b60405162461bcd60e51b815260206004820152601f60248201527f42617365555249206c6f636b6564206166746572206669727374206d696e74006044820152606490fd5b5080fd5b503461021b578060031936011261021b576020600354604051908152f35b503461021b5761084661084161105636611751565b9061106282828561186e565b60405192611071602085611691565b868452611ec9565b503461021b578060031936011261021b576110a060ff600254610240828260a01c16611b2e565b6110ac61025633611cf9565b60016110b733611d98565b106111c257338152600560205260ff60408220541661117d576108ae6003541015611143576020903381526005825260408120600160ff19825416179055611100600354611be5565b8091816003556111108233611e25565b6040519081527ff9188ffd3cfd4a7ac11288813d10332eba8da184d1dea52c64fc04bfa6027efe843392a3604051908152f35b60405162461bcd60e51b8152602060048201526012602482015271283630bcb2b91039bab838363c9037bb32b960711b6044820152606490fd5b60405162461bcd60e51b815260206004820152601a60248201527f506c61796572205061737320616c7265616479206d696e7465640000000000006044820152606490fd5b60405162461bcd60e51b815260206004820152601c60248201527f436865636b20696e2066697273743a206e656564203120706f696e74000000006044820152606490fd5b503461021b578060031936011261021b576002546001600160a01b031661122f338214611836565b6007549081156112ea57828080848194826007555af13d156112e5573d61125581611b12565b906112636040519283611691565b81528360203d92013e5b156112ae576002546040519182526001600160a01b0316907f7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d590602090a280f35b60405162461bcd60e51b815260206004820152600f60248201526e15da5d1a191c985dc819985a5b1959608a1b6044820152606490fd5b61126d565b60405162461bcd60e51b81526020600482015260136024820152724e6f7468696e6720746f20776974686472617760681b6044820152606490fd5b503461021b578060031936011261021b5760206040516108ae8152f35b503461021b578060031936011261021b57602060ff60025460a01c166040519015158152f35b503461021b578060031936011261021b576020600454604051908152f35b503461021b5761084661139836611751565b9161186e565b503461021b578060031936011261021b576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b503461021b57602036600319011261021b577f40db37ff5c0bdc2c427fbb2078c8f24afea940abac0e3c23bb4ea3bf2da2b2126020611420611742565b60025490611438336001600160a01b03841614611836565b15159060ff60a81b8260a81b169060ff60a81b191617600255604051908152a180f35b503461021b57604036600319011261021b57611475611711565b602435906001600160a01b0361148a83611c40565b169081331480156114f0575b61149f906117f9565b828452600b6020526040842080546001600160a01b0319166001600160a01b03929092169182179055907f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b9258480a480f35b50818452600c6020908152604080862033875290915284205460ff16611496565b503461021b57602036600319011261021b576020906004358082526009835261154760018060a01b0360408420541615156117b9565b8152600b8252604060018060a01b0391205416604051908152f35b503461021b578060031936011261021b57604051908080549061158482611657565b8085529160018116908115610a9057506001146115ab576106e6846106d281860382611691565b80805260208120939250905b8082106115d0575090915081016020016106d282610a23565b9192600181602092548385880101520191019092916115b7565b90503461101f57602036600319011261101f5760043563ffffffff60e01b81168091036103c257602092506380ac58cd60e01b8114908115611646575b8115611635575b5015158152f35b6301ffc9a760e01b1490503861162e565b635b5e139f60e01b81149150611627565b90600182811c92168015611687575b602083101461167157565b634e487b7160e01b600052602260045260246000fd5b91607f1691611666565b90601f8019910116810190811067ffffffffffffffff8211176116b357604052565b634e487b7160e01b600052604160045260246000fd5b60005b8381106116dc5750506000910152565b81810151838201526020016116cc565b90602091611705815180928185528580860191016116c9565b601f01601f1916010190565b600435906001600160a01b038216820361172757565b600080fd5b602435906001600160a01b038216820361172757565b60043590811515820361172757565b6060906003190112611727576004356001600160a01b038116810361172757906024356001600160a01b0381168103611727579060443590565b9181601f840112156117275782359167ffffffffffffffff8311611727576020838186019501011161172757565b156117c057565b60405162461bcd60e51b81526020600482015260116024820152702737b732bc34b9ba32b73a103a37b5b2b760791b6044820152606490fd5b1561180057565b60405162461bcd60e51b815260206004820152600e60248201526d139bdd08185d5d1a1bdc9a5e995960921b6044820152606490fd5b1561183d57565b60405162461bcd60e51b81526020600482015260096024820152682737ba1037bbb732b960b91b6044820152606490fd5b906001600160a01b0361188084611c40565b168033148015611af3575b8015611ac5575b61189c91506117f9565b6118a583611c40565b6001600160a01b039283169216829003611a92576001600160a01b0316906118ce821515611c66565b6000838152600b6020526040812080546001600160a01b03191690558390827f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b9258280a480600052600a60205260406000208054906000198201918211611a7c575581600052600a602052604060002080549060018201809211611a7c57558260005260096020526040600020826bffffffffffffffffffffffff60a01b82541617905582600052600e60205260406000205481600052600d60205260406000209081546000198101908111611a7c576119a79083611ca1565b90549060031b1c6119d5816119bc8486611ca1565b90919082549060031b91821b91600019901b1916179055565b600052600e60205260406000205580548015611a665760001901906119fa8282611ca1565b8154906000199060031b1b191690555581600052600d60205260406000205483600052600e60205260406000205581600052600d602052611a3f836040600020611ccf565b7fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef600080a4565b634e487b7160e01b600052603160045260246000fd5b634e487b7160e01b600052601160045260246000fd5b60405162461bcd60e51b815260206004820152600b60248201526a2bb937b7339037bbb732b960a91b6044820152606490fd5b50600052600c602052604060002060018060a01b03331660005260205261189c60ff60406000205416611892565b5083600052600b60205260018060a01b0360406000205416331461188b565b67ffffffffffffffff81116116b357601f01601f191660200190565b15611b3557565b60405162461bcd60e51b815260206004820152600e60248201526d135a5b9d081a5cc818db1bdcd95960921b6044820152606490fd5b15611b7257565b60405162461bcd60e51b815260206004820152600b60248201526a135a5b9d081c185d5cd95960aa1b6044820152606490fd5b15611bac57565b60405162461bcd60e51b81526020600482015260116024820152701059d95b9d081251081c995c5d5a5c9959607a1b6044820152606490fd5b6000198114611a7c5760010190565b15611bfb57565b60405162461bcd60e51b815260206004820152601060248201526f155b9cd85999481c9958da5c1a595b9d60821b6044820152606490fd5b91908201809211611a7c57565b6000908152600960205260409020546001600160a01b0316611c638115156117b9565b90565b15611c6d57565b60405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606490fd5b8054821015611cb95760005260206000200190600090565b634e487b7160e01b600052603260045260246000fd5b90815491680100000000000000008310156116b357826119bc916001611cf795018155611ca1565b565b6040516370a0823160e01b81526001600160a01b03918216600482015290602090829060249082907f0000000000000000000000000000000000000000000000000000000000000000165afa908115611d8c57600091611d5a575b50151590565b90506020813d602011611d84575b81611d7560209383611691565b81010312611727575138611d54565b3d9150611d68565b6040513d6000823e3d90fd5b60405163cf6a440360e01b81526001600160a01b03918216600482015290602090829060249082907f0000000000000000000000000000000000000000000000000000000000000000165afa908115611d8c57600091611df6575090565b90506020813d602011611e1d575b81611e1160209383611691565b81010312611727575190565b3d9150611e04565b600082815260096020908152604080832080546001600160a01b0319166001600160a01b03959095169485179055838352600a909152902080546001810191908210611a7c575580600052600d60205260406000205482600052600e60205260406000205580600052600d602052611ea1826040600020611ccf565b60007fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef8180a4565b919290803b15611f9557611f1993600060209460405196879586948593630a85bd0160e11b855233600486015260018060a01b0316602485015260448401526080606484015260848301906116ec565b03926001600160a01b03165af18091600091611f52575b5090611f3c5750600090565b6001600160e01b031916630a85bd0160e11b1490565b6020813d602011611f8d575b81611f6b60209383611691565b8101031261101f5751906001600160e01b03198216820361021b575038611f30565b3d9150611f5e565b50505050600190565b801561204657600081805b6120325750611fb781611b12565b90611fc56040519283611691565b808252601f19611fd482611b12565b013660208401375b8092801561202b576000198201918211611a7c578193600a82066030019283603011611a7c5784511115611cb957600a9260f81b6001600160f81b03191660001a908401601f01530491611fdc565b5050905090565b9061203e600a91611be5565b910480611fa9565b50604051612055604082611691565b60018152600360fc1b60208201529056fef3f7a9fe364faab93b216da50a3214154f22a0a2b415b23a84c8169e8b636ee3a26469706673582212202a305c3d68fc08a58ab09475ee06c3e72a2b313a5eb285ebb6681c960048e61664736f6c634300081a0033";
+const PASS_ABI = [{"inputs":[{"internalType":"address","name":"agentId_","type":"address"},{"internalType":"address","name":"checkIn_","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"tokenOwner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"tokenOwner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"baseURI","type":"string"}],"name":"BaseURISet","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"bool","name":"open","type":"bool"}],"name":"MintOpenSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint8","name":"lane","type":"uint8"}],"name":"PassMinted","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"bool","name":"paused","type":"bool"}],"name":"PausedSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"PoolFunded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[],"name":"FOUNDER_ID_OFFSET","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"FOUNDER_PRICE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"FOUNDER_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"PLAYER_SUPPLY","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"POOL_SHARE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"agentId","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"approved","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"baseURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"canMintFounder","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"canMintPlayer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkIn","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"founderMinted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"founderRemaining","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"hasFounderPass","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"hasMintedFounder","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"hasMintedPlayer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"hasPlayerPass","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mintFounder","outputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"mintOpen","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mintPlayer","outputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ownerBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"playerMinted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"playerRemaining","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"newBaseURI","type":"string"}],"name":"setBaseURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"open","type":"bool"}],"name":"setMintOpen","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"paused_","type":"bool"}],"name":"setPaused","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"pure","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"tokensOfOwner","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalMinted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+// Minimal read selectors (verified against the compiled ABI).
+const SEL = {
+  agentId: "0xe84f43b7",        // agentId()
+  checkIn: "0x183ff085",        // checkIn()  (the companion address getter)
+  founderPrice: "0xfed5793f",   // FOUNDER_PRICE()
+  playerSupply: "0x396ad1d7",   // PLAYER_SUPPLY()
+  founderSupply: "0xc932b577",  // FOUNDER_SUPPLY()
+  playerMinted: "0x47e7d661",   // playerMinted()
+  founderMinted: "0x24659318",  // founderMinted()
+  ownerBalance: "0xbedcf003",   // ownerBalance()
+  mintOpen: "0x24bbd049",       // mintOpen()
+  paused: "0x5c975abb",         // paused()
+  baseURI: "0x6c0360eb"         // baseURI()
+};
+const $ = (id) => document.getElementById(id);
+function validAddress(a) { return typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a); }
+function fmtBNB(wei) {
+  const v = BigInt(wei);
+  if (v === 0n) return "0 BNB";
+  const whole = v / 1000000000000000000n;
+  const frac = (v % 1000000000000000000n).toString().padStart(18, "0").slice(0, 6).replace(/0+$/, "");
+  return (frac ? whole.toString() + "." + frac : whole.toString()) + " BNB";
+}
+let provider = null, signer = null, account = null, passAddress = "";
+try { const saved = localStorage.getItem("agentdraw_pass_contract"); if (validAddress(saved)) passAddress = saved; } catch (e) { /* storage unavailable */ }
+
+async function connect() {
+  if (!window.ethereum) { $("connectStatus").textContent = "No wallet found in this browser — open this page inside MetaMask / Trust Wallet."; return; }
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  try {
+    const net = await provider.getNetwork();
+    if (net.chainId !== CHAIN_ID) {
+      try { await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] }); }
+      catch (e) {
+        await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{ chainId: CHAIN_HEX, chainName: "BNB Smart Chain Mainnet", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: ["https://bsc-dataseed.binance.org/"], blockExplorerUrls: ["https://bscscan.com"] }] });
+      }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+    }
+  } catch (e) { /* best effort — the deploy tx itself will fail on a wrong chain */ }
+  signer = provider.getSigner();
+  account = await signer.getAddress();
+  $("connectStatus").innerHTML = 'Connected: <span class="mono">' + account + '</span>';
+  $("deployBtn").disabled = false;
+  $("deployStatus").textContent = "Ready to deploy — or use steps 03–05 if the contract below is already deployed.";
+  setManageEnabled(!!passAddress);
+  if (passAddress) { $("deployStatus").textContent = "A saved contract address was found — state loaded below. Deploy again only for a fresh contract."; refreshState(); }
+}
+$("connectBtn").addEventListener("click", () => connect().catch(e => { $("connectStatus").textContent = "Connection failed: " + (e.message || e); }));
+
+function guard(inputId, warnId, expected) {
+  const v = $(inputId).value.trim();
+  $(warnId).style.display = (validAddress(v) && v.toLowerCase() !== expected.toLowerCase()) ? "block" : "none";
+}
+$("registryInput").addEventListener("input", () => guard("registryInput", "registryWarn", EXPECTED_REGISTRY));
+$("checkinInput").addEventListener("input", () => guard("checkinInput", "checkinWarn", EXPECTED_CHECKIN));
+guard("registryInput", "registryWarn", EXPECTED_REGISTRY); guard("checkinInput", "checkinWarn", EXPECTED_CHECKIN);
+
+async function readUint(addr, data) { const out = await provider.call({ to: addr, data }); return (!out || out === "0x") ? 0n : BigInt(out); }
+async function readAddr(addr, data) { const out = await provider.call({ to: addr, data }); return "0x" + out.slice(-40); }
+async function readStr(addr, data) { const out = await provider.call({ to: addr, data }); return ethers.utils.defaultAbiCoder.decode(["string"], out)[0]; }
+function passContract() { return new ethers.Contract(passAddress, PASS_ABI, signer); }
+
+async function refreshState() {
+  if (!provider || !validAddress(passAddress)) return;
+  try {
+    const reg = await readAddr(passAddress, SEL.agentId);
+    const ci = await readAddr(passAddress, SEL.checkIn);
+    const price = await readUint(passAddress, SEL.founderPrice);
+    const pSup = await readUint(passAddress, SEL.playerSupply);
+    const fSup = await readUint(passAddress, SEL.founderSupply);
+    const pMint = await readUint(passAddress, SEL.playerMinted);
+    const fMint = await readUint(passAddress, SEL.founderMinted);
+    const oBal = await readUint(passAddress, SEL.ownerBalance);
+    const open = (await readUint(passAddress, SEL.mintOpen)) !== 0n;
+    const paused = (await readUint(passAddress, SEL.paused)) !== 0n;
+    const base = await readStr(passAddress, SEL.baseURI);
+    $("contractKv").style.display = "grid";
+    $("kvContract").innerHTML = '<a href="https://bscscan.com/address/' + passAddress + '" target="_blank" rel="noopener">' + passAddress + '</a>';
+    $("kvRegistry").textContent = reg;
+    $("kvCheckIn").textContent = ci;
+    $("kvOwner").textContent = account || "—";
+    $("kvPrice").textContent = price.toString() + " wei (" + fmtBNB(price) + ")";
+    $("kvSupplies").textContent = "Player " + pSup.toString() + " (IDs 1–" + pSup.toString() + ") · Founder " + fSup.toString() + " (IDs 5001–" + (5000n + fSup).toString() + ")";
+    $("kvMintOpen").textContent = open ? "true — mint open" : "false — mint closed";
+    $("kvPlayer").textContent = pMint.toString() + " / " + pSup.toString();
+    $("kvFounder").textContent = fMint.toString() + " / " + fSup.toString();
+    $("kvOwnerBal").textContent = fmtBNB(oBal) + " (" + oBal.toString() + " wei)";
+    $("kvFlags").textContent = "mintOpen: " + open + " · paused: " + paused;
+    $("kvBaseUri").textContent = base || "(not set)";
+    $("summaryBox").value =
+"AgentDrawPass deployment summary — BNB Chain (chainId 56)\n" +
+"Pass contract: " + passAddress + "\n" +
+"Agent ID registry: " + reg + "\n" +
+"Check-in companion: " + ci + "\n" +
+"Owner: " + (account || "") + "\n" +
+"Free action: mintPlayer() — value 0, no approval; needs an Agent ID + 1 check-in point; IDs 1-2222, 1 per wallet\n" +
+"Paid action: mintFounder() — exactly " + fmtBNB(price) + "; 0.0005 BNB to the check-in pool + 0.0005 BNB owner balance, split inside the mint; IDs 5001-5500, 1 per wallet\n" +
+"baseURI: " + (base || "(not set)") + "\n" +
+"Minted: player " + pMint.toString() + "/" + pSup.toString() + " · founder " + fMint.toString() + "/" + fSup.toString() + " · owner balance " + fmtBNB(oBal) + "\n" +
+"mintOpen: " + open + " · paused: " + paused + "\n" +
+"BscScan: https://bscscan.com/address/" + passAddress;
+  } catch (e) { $("stateStatus").textContent = "State read failed: " + (e.message || e); }
+}
+function setManageEnabled(on) {
+  ["baseUriBtn", "openBtn", "closeBtn", "pauseBtn", "unpauseBtn", "refreshBtn", "withdrawBtn"].forEach(id => { $(id).disabled = !on; });
+}
+$("deployBtn").addEventListener("click", async () => {
+  const registry = $("registryInput").value.trim();
+  const checkin = $("checkinInput").value.trim();
+  if (!validAddress(registry) || !validAddress(checkin)) { $("deployStatus").textContent = "Both constructor arguments must be valid 0x addresses."; return; }
+  $("deployBtn").disabled = true;
+  $("deployStatus").textContent = "Deploying — confirm the transaction in your wallet…";
+  try {
+    const factory = new ethers.ContractFactory(PASS_ABI, CREATION_HEX, signer);
+    const contract = await factory.deploy(registry, checkin);
+    $("deployStatus").textContent = "Transaction sent: " + contract.deployTransaction.hash + " — waiting for confirmation…";
+    await contract.deployed();
+    passAddress = contract.address;
+    try { localStorage.setItem("agentdraw_pass_contract", passAddress); } catch (e) { /* storage unavailable */ }
+    $("deployStatus").innerHTML = '<span class="ok">Deployed ✓</span> Contract: <span class="mono">' + passAddress + '</span>';
+    setManageEnabled(true);
+    await refreshState();
+  } catch (e) { $("deployStatus").textContent = "Deploy failed: " + (e.message || e); }
+  $("deployBtn").disabled = false;
+});
+async function sendManage(fn, args, statusId, okText) {
+  if (!signer || !validAddress(passAddress)) return;
+  try {
+    const tx = await passContract()[fn](...args);
+    $(statusId).textContent = "Sent: " + tx.hash + " — waiting…";
+    await tx.wait();
+    $(statusId).innerHTML = '<span class="ok">' + okText + '</span> Tx: <span class="mono">' + tx.hash + '</span>';
+    await refreshState();
+  } catch (e) { $(statusId).textContent = "Failed: " + (e.message || e); }
+}
+$("baseUriBtn").addEventListener("click", () => {
+  const v = $("baseUriInput").value.trim();
+  if (!v) { $("baseUriStatus").textContent = "Enter a base URI first."; return; }
+  sendManage("setBaseURI", [v], "baseUriStatus", "Base URI set ✓ — it locks at the first mint.");
+});
+$("openBtn").addEventListener("click", () => sendManage("setMintOpen", [true], "openStatus", "Mint open ✓ — both lanes are live."));
+$("closeBtn").addEventListener("click", () => sendManage("setMintOpen", [false], "openStatus", "Mint closed ✓"));
+$("pauseBtn").addEventListener("click", () => sendManage("setPaused", [true], "pauseStatus", "Mints paused ✓ (transfers unaffected)"));
+$("unpauseBtn").addEventListener("click", () => sendManage("setPaused", [false], "pauseStatus", "Mints unpaused ✓"));
+$("withdrawBtn").addEventListener("click", () => sendManage("withdraw", [], "stateStatus", "Owner balance withdrawn ✓"));
+$("refreshBtn").addEventListener("click", refreshState);
+$("copySummaryBtn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("summaryBox").value); $("copySummaryBtn").textContent = "Copied ✓"; setTimeout(() => { $("copySummaryBtn").textContent = "Copy summary"; }, 2500); }
+  catch (e) { $("summaryBox").select(); }
+});
+</script>
+</body>
+</html>
