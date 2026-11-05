@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
 
@@ -140,6 +140,22 @@
       <b>0.0005 BNB goes straight into the check-in pool</b>, 0.0005 BNB to the project. One pass per wallet per lane.
       A Pass is a collectible that funds the free ecosystem — it grants no discount or advantage in the draw itself.
     </p>
+    <div class="pass-art">
+      <figure class="pass-art-card">
+        <img src="pass/metadata/images/1.svg" alt="AgentDraw Player Pass #1 — light paper ticket" loading="lazy">
+        <figcaption>
+          <b data-i18n="passArtPlayerTitle">Player Pass #1 — the free paper ticket</b>
+          <span data-i18n="passArtPlayerCap">Light paper, ink lines, one orange FREE stamp — no gold, on purpose. The everyday pass: check in once (1 point) and it is yours, free.</span>
+        </figcaption>
+      </figure>
+      <figure class="pass-art-card">
+        <img src="pass/metadata/images/5001.svg" alt="AgentDraw Founder Pass #5001 — dark gold-foil certificate" loading="lazy">
+        <figcaption>
+          <b data-i18n="passArtFounderTitle">Founder Pass #5001 — the gold-foil certificate</b>
+          <span data-i18n="passArtFounderCap">Deep ink, gold frame and serial, red wax seal — the premium edition. 0.001 BNB, and half of every mint lands straight in the check-in pool.</span>
+        </figcaption>
+      </figure>
+    </div>
     <div class="you-grid">
       <div class="you-cell"><span class="stat-label" data-i18n="passPlayerLabel">Player minted (free)</span><span class="stat-value mono" id="passPlayerCount">—</span></div>
       <div class="you-cell"><span class="stat-label" data-i18n="passFounderLabel">Founder minted (paid)</span><span class="stat-value mono" id="passFounderCount">—</span></div>
@@ -467,6 +483,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
