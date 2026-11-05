@@ -94,10 +94,43 @@
     </div>
   </div>
 
-  <!-- ── 02 · BUY — the ticket ────────────────────────────── -->
-  <section class="section reveal" id="buy">
+  <!-- ── 02 · EARN — free daily check-in ────────────────── -->
+  <section class="section reveal" id="earn">
     <header class="sec-head">
       <span class="sec-num">02</span>
+      <h2 data-i18n="earnTitle">Earn your ticket — the free daily check-in</h2>
+      <span class="refresh-note mono" data-i18n="earnRefresh">Free · value 0 · once a day</span>
+    </header>
+    <p class="panel-sub" data-i18n-html="earnSub">
+      No BNB payment needed to start: Agent ID holders <b>check in free</b> once a day and earn <b>1 point</b> per check-in.
+      At <b>100 points</b>, <span class="mono">redeem()</span> pays you exactly <b>0.0005 BNB</b> — the price of one ticket — from the check-in pool.
+      The pool is funded by the project and by anyone who wants to support it; it has <b>no owner withdrawal</b>,
+      so funded BNB can only ever leave as redemptions.
+    </p>
+    <div class="you-grid">
+      <div class="you-cell"><span class="stat-label" data-i18n="ciPointsLabel">Your points</span><span class="stat-value mono" id="ciPoints">—</span></div>
+      <div class="you-cell"><span class="stat-label" data-i18n="ciStatusLabel">Today</span><span class="stat-value small" id="ciStatus">—</span></div>
+      <div class="you-cell"><span class="stat-label" data-i18n="ciPoolLabel">Check-in pool</span><span class="stat-value mono" id="ciPool">—</span></div>
+      <div class="you-cell"><span class="stat-label" data-i18n="ciTodayLabel">Check-ins today</span><span class="stat-value mono" id="ciToday">—</span></div>
+    </div>
+    <h3 class="prompt-title" data-i18n="promptCheckInTitle">Agent-first — hand this to your AI agent (the FREE action)</h3>
+    <div class="prompt-box">
+      <textarea id="promptCheckIn" class="prompt-text" rows="8" readonly></textarea>
+      <button class="btn btn-accent copy-btn" type="button" data-copy="promptCheckIn" data-i18n="copyPrompt">COPY PROMPT</button>
+    </div>
+    <details>
+      <summary data-i18n="ciAdvSummary">Advanced — check in or redeem directly with a connected wallet</summary>
+      <div class="adv-actions">
+        <button class="btn btn-accent" id="ciCheckInBtn" type="button" data-i18n="ciCheckInBtn">Check in free — checkIn()</button>
+        <button class="btn" id="ciRedeemBtn" type="button" data-i18n="ciRedeemBtn">Redeem 100 points — redeem()</button>
+        <span class="small muted" data-i18n="ciHint">checkIn() sends value 0 — you only pay gas. redeem() needs 100 points and pays exactly 0.0005 BNB from the pool to your wallet.</span>
+      </div>
+    </details>
+  </section>
+  <!-- ── 03 · BUY — the ticket ────────────────────────────── -->
+  <section class="section reveal" id="buy">
+    <header class="sec-head">
+      <span class="sec-num">03</span>
       <h2 data-i18n="buyTitle">Buy tickets — today's draw</h2>
     </header>
     <p class="panel-sub" data-i18n-html="buySub">
@@ -144,10 +177,10 @@
     </div>
   </section>
 
-  <!-- ── 03 · TODAY'S BOARD ───────────────────────────────── -->
+  <!-- ── 04 · TODAY'S BOARD ───────────────────────────────── -->
   <section class="section reveal" id="board">
     <header class="sec-head">
-      <span class="sec-num">03</span>
+      <span class="sec-num">04</span>
       <h2 data-i18n="boardTitle">Today's entries</h2>
       <span class="refresh-note mono" data-i18n="boardRefresh">Live from the contract · refreshes every 60s</span>
     </header>
@@ -157,10 +190,10 @@
     </div>
   </section>
 
-  <!-- ── 04 · LIVE ACTIVITY ───────────────────────────────── -->
+  <!-- ── 05 · LIVE ACTIVITY ───────────────────────────────── -->
   <section class="section reveal" id="activity">
     <header class="sec-head">
-      <span class="sec-num">04</span>
+      <span class="sec-num">05</span>
       <h2 data-i18n="actTitle">Live activity</h2>
       <span class="refresh-note mono" data-i18n="actRefresh">Newest first · read from entryAt</span>
     </header>
@@ -176,10 +209,10 @@
     </div>
   </section>
 
-  <!-- ── 05 · YOU ─────────────────────────────────────────── -->
+  <!-- ── 06 · YOU ─────────────────────────────────────────── -->
   <section class="section reveal" id="you">
     <header class="sec-head">
-      <span class="sec-num">05</span>
+      <span class="sec-num">06</span>
       <h2 data-i18n="youTitle">Your draw card</h2>
     </header>
     <p class="panel-sub" data-i18n="youSub">Connect a wallet, or paste any address to look up its Agent ID, today's tickets and lifetime wins.</p>
@@ -195,10 +228,10 @@
     </div>
   </section>
 
-  <!-- ── 06 · SETTLE ──────────────────────────────────────── -->
+  <!-- ── 07 · SETTLE ──────────────────────────────────────── -->
   <section class="section reveal" id="settle">
     <header class="sec-head">
-      <span class="sec-num">06</span>
+      <span class="sec-num">07</span>
       <h2 data-i18n="settleTitle">Settle the draw</h2>
     </header>
     <p class="panel-sub" data-i18n="settleSub">After 00:00 UTC, anyone can settle the finished day — no owner needed. The contract draws the winning ticket from that day's entry ranges and pays the winner the entire prize pool automatically.</p>
@@ -213,10 +246,10 @@
     </div>
   </section>
 
-  <!-- ── 07 · WINNER SPOTLIGHT ────────────────────────────── -->
+  <!-- ── 08 · WINNER SPOTLIGHT ────────────────────────────── -->
   <section class="section reveal" id="spotlight">
     <header class="sec-head">
-      <span class="sec-num">07</span>
+      <span class="sec-num">08</span>
       <h2 data-i18n="spotTitle">Winner spotlight</h2>
       <span class="refresh-note mono" data-i18n="spotNote">The latest settled draw · dayWinner + dayPool</span>
     </header>
@@ -225,10 +258,10 @@
     </div>
   </section>
 
-  <!-- ── 08 · HALL OF DRAWS ───────────────────────────────── -->
+  <!-- ── 09 · HALL OF DRAWS ───────────────────────────────── -->
   <section class="section reveal" id="hall">
     <header class="sec-head">
-      <span class="sec-num">08</span>
+      <span class="sec-num">09</span>
       <h2 data-i18n="hallTitle">Hall of Draws</h2>
       <span class="refresh-note mono" data-i18n="hallRefresh">Settled days, read from dayWinner</span>
     </header>
@@ -238,10 +271,10 @@
     </div>
   </section>
 
-  <!-- ── 09 · ALL-TIME STATS ──────────────────────────────── -->
+  <!-- ── 10 · ALL-TIME STATS ──────────────────────────────── -->
   <section class="section reveal" id="stats">
     <header class="sec-head">
-      <span class="sec-num">09</span>
+      <span class="sec-num">10</span>
       <h2 data-i18n="statsTitle">The all-time record</h2>
     </header>
     <p class="panel-sub" id="statsCaption">Counting starts at launch. These numbers are read from the contract — never typed in by hand.</p>
@@ -253,11 +286,11 @@
     </div>
   </section>
 
-  <!-- ── 10 · HOW + RULES — ink band ──────────────────────── -->
+  <!-- ── 11 · HOW + RULES — ink band ──────────────────────── -->
   <section class="band reveal" id="how">
     <div class="band-inner">
       <header class="sec-head">
-        <span class="sec-num">10</span>
+        <span class="sec-num">11</span>
         <h2 data-i18n="howTitle">How it works</h2>
       </header>
       <div class="how-grid">
@@ -292,10 +325,10 @@
     </div>
   </div>
 
-  <!-- ── 11 · VERIFY IT YOURSELF ──────────────────────────── -->
+  <!-- ── 12 · VERIFY IT YOURSELF ──────────────────────────── -->
   <section class="section reveal" id="verify">
     <header class="sec-head">
-      <span class="sec-num">11</span>
+      <span class="sec-num">12</span>
       <h2 data-i18n="verifyTitle">Verify it yourself</h2>
     </header>
     <p class="panel-sub" data-i18n="verifyNote">Don't take this page's word for anything — the contract is public, and every number on it can be checked with a block explorer or a single eth_call.</p>
@@ -341,10 +374,10 @@
     </div>
   </section>
 
-  <!-- ── 12 · FAQ ─────────────────────────────────────────── -->
+  <!-- ── 13 · FAQ ─────────────────────────────────────────── -->
   <section class="section reveal" id="faq">
     <header class="sec-head">
-      <span class="sec-num">12</span>
+      <span class="sec-num">13</span>
       <h2 data-i18n="faqTitle">Questions, answered straight</h2>
     </header>
     <div class="faq-list">
@@ -359,11 +392,11 @@
     </div>
   </section>
 
-  <!-- ── 13 · BUILT FOR AGENTS — ink band ─────────────────── -->
+  <!-- ── 14 · BUILT FOR AGENTS — ink band ─────────────────── -->
   <section class="band agents-band reveal" id="agents">
     <div class="band-inner">
       <header class="sec-head">
-        <span class="sec-num">13</span>
+        <span class="sec-num">14</span>
         <h2 data-i18n="agentsTitle">Built for agents</h2>
       </header>
       <p class="band-sub" data-i18n="agentsNote">AgentDraw is agent-first. The complete machine-readable spec lives on this domain — point your agent at it and it can play, settle and verify without scraping this page.</p>
@@ -397,6 +430,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

@@ -17,6 +17,17 @@ const DRAW_CONFIG = {
 };
 const CONTRACT = DRAW_CONFIG.contractAddress;
 const AGENT_ID = DRAW_CONFIG.agentIdAddress;
+// The FREE check-in companion (AgentDrawCheckIn), deployed by the owner
+// on 2026-11-05 and wired live the same day; while this address were empty,
+// the "Earn your ticket" section would render its pre-launch state and
+// every check-in read would be skipped.
+const CHECKIN_CONFIG = {
+  checkInAddress: "0xFc814Fd5a98C430aACdd78d150D157A5421b761e", // LIVE — AgentDrawCheckIn, deployed 2026-11-05, Sourcify exact match
+  pointsPerPayout: 100,
+  payoutWei: "500000000000000" // 0.0005 BNB exactly — one ticket's price
+};
+const CHECKIN = CHECKIN_CONFIG.checkInAddress;
+function checkInReady() { return validAddress(CHECKIN); }
 const TICKET_PRICE_WEI = "500000000000000"; // 0.0005 BNB exactly, per ticket
 const MAX_PER_TX = 20;
 const POOL_PER_TICKET_WEI = 325000000000000n; // 65% of one ticket (0.000325 BNB) — the pool grows by exactly this per ticket
@@ -37,6 +48,16 @@ const SEL = {
   winsOf: "0x83514ea2",             // winsOf(address)
   paused: "0x5c975abb",             // paused()
   balanceOf: "0x70a08231"           // balanceOf(address) — Agent ID NFT
+};
+// AgentDrawCheckIn selectors (first 4 bytes of keccak256, from its compiled ABI).
+const SEL_CI = {
+  checkIn: "0x183ff085",            // checkIn()
+  redeem: "0xbe040fb0",             // redeem()
+  pointsOf: "0xcf6a4403",           // pointsOf(address)
+  canCheckInToday: "0x591ff3e0",    // canCheckInToday(address)
+  checkInsToday: "0x393f0297",      // checkInsToday()
+  poolBalance: "0x96365d44",        // poolBalance()
+  paused: "0x5c975abb"              // paused() — pauses check-ins only; redeem never pauses
 };
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const BOARD_SCAN_CAP = 400;         // enumerate at most the latest 400 entry chunks for the board
@@ -214,7 +235,28 @@ en: {
   agentsLlms: "the full draw spec — facts, rules, prompts — in plain text",
   agentsJson: "facts, selectors and copy-ready prompts as structured JSON",
   agentsClawhub: "ClawHub skill — play-agent-draw, published on ClawHub",
-  agentsEnterLabel: "The whole game, in one line:"
+  agentsEnterLabel: "The whole game, in one line:",
+  earnTitle: "Earn your ticket — the free daily check-in",
+  earnRefresh: "Free · value 0 · once a day",
+  earnSub: 'No BNB payment needed to start: Agent ID holders <b>check in free</b> once a day and earn <b>1 point</b> per check-in. At <b>100 points</b>, <span class="mono">redeem()</span> pays you exactly <b>0.0005 BNB</b> — the price of one ticket — from the check-in pool. The pool is funded by the project and by anyone who wants to support it; it has <b>no owner withdrawal</b>, so funded BNB can only ever leave as redemptions.',
+  earnSubPre: 'The free daily check-in is not live yet: Agent ID holders will <b>check in free</b> once a day to earn <b>1 point</b> per check-in, and <b>100 points</b> will pay exactly <b>0.0005 BNB</b> — the price of one ticket — from a pool with <b>no owner withdrawal</b>. It opens the moment the check-in contract is deployed and funded.',
+  ciPointsLabel: "Your points",
+  ciStatusLabel: "Today",
+  ciPoolLabel: "Check-in pool",
+  ciTodayLabel: "Check-ins today",
+  ciStatusReady: "✓ You can check in today",
+  ciStatusDone: "Checked in — back tomorrow",
+  ciStatusNoId: "No Agent ID in this wallet",
+  ciStatusPaused: "Check-ins paused (redeem still open)",
+  ciStatusNoAddr: "Paste or connect an address",
+  promptCheckInTitle: "Agent-first — hand this to your AI agent (the FREE action)",
+  ciAdvSummary: "Advanced — check in or redeem directly with a connected wallet",
+  ciCheckInBtn: "Check in free — checkIn()",
+  ciRedeemBtn: "Redeem 100 points — redeem()",
+  ciHint: "checkIn() sends value 0 — you only pay gas. redeem() needs 100 points and pays exactly 0.0005 BNB from the pool to your wallet.",
+  toastCheckIn: "Checked in — +1 point. See you tomorrow.",
+  toastRedeem: "Redeemed — 0.0005 BNB from the check-in pool is on its way to your wallet.",
+  toastCheckInNotLive: "The check-in contract is not live yet — this button goes live with it."
 },
 zh: {
   docTitle: "AgentDraw — 币安 Agent ID 持有者每日链上抽奖",
@@ -387,7 +429,28 @@ zh: {
   agentsLlms: "完整抽奖规范——事实、规则、提示词——纯文本格式",
   agentsJson: "事实、选择器与可复制提示词，结构化 JSON",
   agentsClawhub: "ClawHub 技能 — play-agent-draw，已在 ClawHub 发布",
-  agentsEnterLabel: "整个玩法，一行说清："
+  agentsEnterLabel: "整个玩法，一行说清：",
+  earnTitle: "赚取你的奖票 — 每日免费签到",
+  earnRefresh: "免费 · 金额 0 · 每日一次",
+  earnSub: '无需支付 BNB 即可开始：Agent ID 持有者每天可<b>免费签到</b>一次，每次获得 <b>1 分</b>。累计 <b>100 分</b>后，调用 <span class="mono">redeem()</span> 即可从签到奖池中获得恰好 <b>0.0005 BNB</b>——正是一张奖票的价格。奖池由项目方及任何愿意支持的人注资；它<b>没有项目方提款功能</b>，因此注入的 BNB 只能以兑换的形式流出。',
+  earnSubPre: '每日免费签到尚未上线：Agent ID 持有者将可每天<b>免费签到</b>一次，每次获得 <b>1 分</b>；累计 <b>100 分</b>可获得恰好 <b>0.0005 BNB</b>——正是一张奖票的价格——资金来自一个<b>没有项目方提款功能</b>的奖池。签到合约部署并注资后即刻开启。',
+  ciPointsLabel: "你的分数",
+  ciStatusLabel: "今日状态",
+  ciPoolLabel: "签到奖池",
+  ciTodayLabel: "今日签到数",
+  ciStatusReady: "✓ 今天可以签到",
+  ciStatusDone: "已签到 — 明天再来",
+  ciStatusNoId: "此钱包未持有 Agent ID",
+  ciStatusPaused: "签到已暂停（兑换仍可进行）",
+  ciStatusNoAddr: "请粘贴或连接一个地址",
+  promptCheckInTitle: "Agent 优先 — 把这段提示词交给你的 AI Agent（免费操作）",
+  ciAdvSummary: "高级 — 用已连接的钱包直接签到或兑换",
+  ciCheckInBtn: "免费签到 — checkIn()",
+  ciRedeemBtn: "兑换 100 分 — redeem()",
+  ciHint: "checkIn() 发送的金额为 0——你只支付 gas。redeem() 需要 100 分，并从奖池中向你的钱包支付恰好 0.0005 BNB。",
+  toastCheckIn: "签到成功 — +1 分。明天见。",
+  toastRedeem: "兑换成功 — 签到奖池的 0.0005 BNB 正在发送到你的钱包。",
+  toastCheckInNotLive: "签到合约尚未上线 — 上线后此按钮即可使用。"
 }
 };
 let lang = "en";
@@ -555,6 +618,17 @@ No approvals. Reply with the tx link only.`;
 Contract: ${addr}
 Call settleDay() · selector 0xca624b77 · value 0 · gasLimit 300000. Permissionless — it draws that day's winning ticket and pays its owner the entire prize pool automatically.
 No approvals. Reply: tx link + the winner from dayWinner for the settled day.`;
+  const ciEl = $("promptCheckIn");
+  if (ciEl) {
+    const ciAddr = checkInReady() ? CHECKIN : "(check-in contract not deployed yet — take the address from the official site / draw.json once it is published)";
+    ciEl.value =
+`Do your FREE daily AgentDraw check-in — BNB Chain (56). This action costs no BNB: value 0, no approval (you only pay your own gas).
+Check-in contract: ${ciAddr}
+Call checkIn() · selector 0x183ff085 · value 0 · gasLimit 200000. Awards 1 point. One check-in per wallet per UTC day.
+Points rule: points are not a token and are never called cash. 100 points = exactly 0.0005 BNB (one AgentDraw ticket's price), paid from the check-in pool by redeem() · selector 0xbe040fb0 · value 0. The pool has no owner withdrawal — funded BNB can only leave as redemptions.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on ${AGENT_ID} > 0) · canCheckInToday(my wallet) = true on the check-in contract.
+No approvals. Reply with the tx link only.`;
+  }
 }
 document.querySelectorAll("[data-copy]").forEach(btn => {
   btn.addEventListener("click", async () => {
@@ -591,6 +665,8 @@ function buildShareLinks() {
 // JS-owned texts that applyLang's data-i18n pass cannot paint.
 function paintDynamicTexts() {
   buildShareLinks();
+  const earnSub = document.querySelector("#earn .panel-sub");
+  if (earnSub && !checkInReady()) earnSub.innerHTML = t("earnSubPre");
   const cap = $("statsCaption");
   if (cap && !statsAgg) cap.textContent = t("statsCaptionPre");
   if (cap && statsAgg) paintStatsBand();
@@ -613,6 +689,33 @@ async function paintStats() {
       note.classList.toggle("ok", !isPaused);
     })()
   ];
+  await Promise.allSettled(jobs);
+}
+
+// ── Earn: the free check-in companion ───────────────────────
+// Pool + today's count paint for every visitor; points + status paint
+// for the looked-up / connected address (youAddress), like the draw
+// card. All reads go through the same v8 RPC pool as everything else.
+async function refreshCheckIn() {
+  if (!$("ciPool") || !checkInReady()) return;
+  const jobs = [
+    (async () => { $("ciPool").textContent = formatBNB(await readUint(CHECKIN, SEL_CI.poolBalance)); })(),
+    (async () => { $("ciToday").textContent = fmtNum(await readUint(CHECKIN, SEL_CI.checkInsToday)); })()
+  ];
+  if (youAddress) {
+    jobs.push((async () => { $("ciPoints").textContent = fmtNum(await readUint(CHECKIN, SEL_CI.pointsOf + encAddress(youAddress))); })());
+    jobs.push((async () => {
+      const el = $("ciStatus");
+      const idBal = await readUint(AGENT_ID, SEL.balanceOf + encAddress(youAddress)).catch(() => 0n);
+      if (idBal === 0n) { el.textContent = t("ciStatusNoId"); return; }
+      const isPaused = await readBool(CHECKIN, SEL_CI.paused).catch(() => false);
+      if (isPaused) { el.textContent = t("ciStatusPaused"); return; }
+      const can = await readBool(CHECKIN, SEL_CI.canCheckInToday + encAddress(youAddress)).catch(() => false);
+      el.textContent = can ? t("ciStatusReady") : t("ciStatusDone");
+    })());
+  } else {
+    jobs.push((async () => { $("ciStatus").textContent = t("ciStatusNoAddr"); })());
+  }
   await Promise.allSettled(jobs);
 }
 
@@ -863,6 +966,7 @@ async function paintYou() {
   ];
   await Promise.allSettled(jobs);
   if (spotData) paintSpotlight();
+  refreshCheckIn();
 }
 $("youCheckBtn").addEventListener("click", () => {
   const v = $("youInput").value.trim();
@@ -904,6 +1008,22 @@ async function sendTx(data, weiValue, okMsg) {
 }
 $("enterBtn").addEventListener("click", () => sendTx(SEL.enter + encUint(qty), (BigInt(qty) * BigInt(TICKET_PRICE_WEI)).toString(), t("toastEnter", { n: qty })));
 $("settleBtn").addEventListener("click", () => sendTx(SEL.settleDay, "0", t("toastSettle")));
+// Check-in writes go to the COMPANION contract, always with value 0 —
+// checkIn() is non-payable by design and redeem() pays out, never in.
+async function sendCheckInTx(data, okMsg) {
+  if (!checkInReady()) { showToast(t("toastCheckInNotLive")); return; }
+  const from = walletAddress || await ensureWallet();
+  if (!from) return;
+  try {
+    const txHash = await window.ethereum.request({ method: "eth_sendTransaction", params: [{ from, to: CHECKIN, data, value: "0x0" }] });
+    showToast(okMsg + " Tx: " + txHash);
+    setTimeout(refreshAll, 4000);
+  } catch (e) { showToast(t("toastTxFail") + (e.message || e)); }
+}
+const ciInBtn = $("ciCheckInBtn");
+if (ciInBtn) ciInBtn.addEventListener("click", () => sendCheckInTx(SEL_CI.checkIn, t("toastCheckIn")));
+const ciOutBtn = $("ciRedeemBtn");
+if (ciOutBtn) ciOutBtn.addEventListener("click", () => sendCheckInTx(SEL_CI.redeem, t("toastRedeem")));
 
 // ── Language toggle ───────────────────────────────────────────
 $("langEn").addEventListener("click", () => setLang("en"));
@@ -937,7 +1057,7 @@ let refreshBusy = false;
 async function refreshAll() {
   if (!contractsReady() || refreshBusy) return;
   refreshBusy = true;
-  try { await paintStats(); await refreshToday(); await refreshSpotlight(); await refreshHall(); refreshStats(); if (youAddress) await paintYou(); }
+  try { await paintStats(); await refreshCheckIn(); await refreshToday(); await refreshSpotlight(); await refreshHall(); refreshStats(); if (youAddress) await paintYou(); }
   catch { /* keep the last good render */ }
   finally { refreshBusy = false; }
 }

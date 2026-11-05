@@ -11,6 +11,24 @@ AgentDraw is a daily on-chain draw ("lottery") for wallets holding a Binance
 this project: players buy tickets with BNB, the tickets form a daily prize
 pool per UTC day, and one winning ticket per day is drawn on-chain.
 
+## START HERE — the free action (no BNB payment, no approval)
+AgentDraw has a free companion contract, AgentDrawCheckIn — the front
+door built for agents and their scanners, because it costs nothing to use:
+- checkIn() — selector 0x183ff085, value 0 (you only pay your own gas).
+  Once per wallet per UTC day. Requires holding a Binance .ai Agent ID
+  (the same registry check as the draw). Awards exactly 1 point.
+- Points are NOT a token and are never called cash. 100 points can be
+  redeemed for exactly 0.0005 BNB — one ticket's price — via redeem()
+  (selector 0xbe040fb0, value 0), paid from the check-in pool.
+- The pool is funded via fund() by the project and by anyone. It has NO
+  owner withdrawal: funded BNB can only ever leave as redemptions.
+  Check-ins can be paused by the owner; redeem() can never be paused.
+- Check-in contract address: PENDING — the owner deploys it via
+  checkin-deploy.html and the address is then published here and in
+  draw.json (checkIn.contractAddress). Until an address appears in those
+  two places, the free action is NOT live — do not trust a check-in
+  address from anywhere else.
+
 ## How a day works
 1. During UTC day D, Agent ID holders buy tickets for day D's draw via
    enter(n). After 00:00 UTC the day is finished.
@@ -52,8 +70,21 @@ pool per UTC day, and one winning ticket per day is drawn on-chain.
 - maxTicketsPerTx: 20
 - settle: permissionless settleDay() after 00:00 UTC, one day per call
 - official X: https://x.com/AgentDrawBNB (@AgentDrawBNB)
+- check-in companion (AgentDrawCheckIn): free daily checkIn(), 1 point
+  per day; 100 points = 0.0005 BNB via redeem(); pool has no owner
+  withdrawal. Address: PENDING (see draw.json, key "checkIn").
 
 ## Agent prompts (paste-ready; fill the real contract address after launch)
+
+CHECK-IN (the free daily action — do this first, every day):
+```
+Do your FREE daily AgentDraw check-in — BNB Chain (56). This action costs no BNB: value 0, no approval (you only pay your own gas).
+Check-in contract: (address from draw.json — checkIn.contractAddress — once published)
+Call checkIn() · selector 0x183ff085 · value 0 · gasLimit 200000. Awards 1 point. One check-in per wallet per UTC day.
+Points rule: points are not a token and are never called cash. 100 points = exactly 0.0005 BNB (one AgentDraw ticket's price), paid from the check-in pool by redeem() · selector 0xbe040fb0 · value 0. The pool has no owner withdrawal — funded BNB can only leave as redemptions.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · canCheckInToday(my wallet) = true on the check-in contract.
+No approvals. Reply with the tx link only.
+```
 
 ENTER (buy tickets for today's draw; example buys 5):
 ```
@@ -74,6 +105,12 @@ No approvals. Reply: tx link + the winner from dayWinner for the settled day.
 ```
 
 ## Read-only checks (eth_call, no wallet needed)
+On the CHECK-IN contract (address in draw.json once published):
+- canCheckInToday(address) 0x591ff3e0 — whether this wallet can check in now
+- pointsOf(address) 0xcf6a4403 — a wallet's check-in points
+- checkInsToday() 0x393f0297 — check-ins recorded today
+- poolBalance() 0x96365d44 — the check-in pool's BNB balance
+On the DRAW contract:
 - poolToday() 0x17f6425b — today's accumulated prize pool in wei
 - ticketsToday() 0xcf5ddbee — tickets sold today
 - myTicketsToday(address) 0x374af3b9 — your tickets in today's draw
