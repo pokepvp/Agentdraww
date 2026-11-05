@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentDraw Check-In — Deploy Console (Owner)</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#F4F1EA; --paper-2:#ECE7DB; --card:#FBF9F3; --ink:#16130E; --ink-soft:#3B362B; --muted:#6F695B; --line:#D9D3C3; --accent:#FF4A1C; --accent-deep:#C9330E; --sage:#6C7247; --danger:#B3261E; --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:"Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background:var(--paper); color:var(--ink); }
+  .wrap{ max-width:880px; margin:0 auto; padding:34px 18px 90px; }
+  header{ display:flex; align-items:center; gap:14px; }
+  header img{ width:46px; height:46px; }
+  h1{ margin:0; font-family:"Archivo", sans-serif; font-weight:900; font-size:26px; letter-spacing:.2px; }
+  .sub{ color:var(--muted); margin:4px 0 0; font-size:14px; }
+  .step{ background:var(--card); border:2px solid var(--ink); padding:20px; margin-top:18px; }
+  .step h2{ margin:0 0 8px; font-family:"Archivo", sans-serif; font-weight:800; font-size:18px; }
+  .step p{ color:var(--ink-soft); font-size:14px; line-height:1.55; margin:0 0 12px; }
+  .mono{ font-family:var(--mono); font-size:12.5px; word-break:break-all; }
+  .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  button{ appearance:none; border:2px solid var(--ink); padding:12px 18px; font-weight:700; font-size:15px; cursor:pointer; background:var(--card); color:var(--ink); font-family:inherit; }
+  button:hover{ box-shadow:4px 4px 0 var(--ink); transform:translate(-2px,-2px); }
+  button:disabled{ opacity:.45; cursor:not-allowed; box-shadow:none; transform:none; }
+  button.accent{ background:var(--accent); color:var(--paper); }
+  button.danger{ background:transparent; color:var(--danger); border-color:var(--danger); }
+  input[type=text]{ width:100%; background:#fff; border:2px solid var(--ink); padding:11px 12px; color:var(--ink); font-family:var(--mono); font-size:13px; }
+  input[type=text]:focus{ outline:none; border-color:var(--accent); }
+  label{ display:block; font-size:13px; color:var(--ink-soft); margin:0 0 6px; font-weight:600; }
+  .warn{ display:none; margin-top:10px; padding:10px 12px; border:2px solid var(--danger); color:var(--danger); font-size:13.5px; line-height:1.5; background:#fff; }
+  .warnbox{ margin:0 0 12px; padding:12px 14px; border:2px solid var(--danger); color:var(--danger); font-size:14px; line-height:1.55; background:#fff; }
+  .warnbox b{ text-transform:uppercase; letter-spacing:.03em; }
+  .status{ font-size:13.5px; color:var(--muted); margin-top:10px; min-height:20px; line-height:1.5; }
+  .kv{ display:grid; grid-template-columns:190px 1fr; gap:6px 14px; font-size:13.5px; margin-top:6px; }
+  .kv dt{ color:var(--muted); } .kv dd{ margin:0; }
+  textarea{ width:100%; min-height:190px; background:#fff; color:var(--ink); border:2px solid var(--ink); padding:14px; font-family:var(--mono); font-size:12.5px; line-height:1.6; }
+  .ok{ color:var(--sage); font-weight:700; } .bad{ color:var(--danger); }
+  footer{ color:var(--muted); font-size:12.5px; margin-top:26px; line-height:1.6; }
+  a{ color:var(--accent-deep); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo.svg" alt="AgentDraw logo">
+    <div>
+      <h1>AgentDraw Check-In — Deploy Console (Owner)</h1>
+      <p class="sub">The FREE daily check-in companion to AgentDraw · BNB Smart Chain (chainId 56) · This page is the owner's tool — it is not linked from the public site.</p>
+    </div>
+  </header>
+
+  <section class="step" id="step1">
+    <h2>01 — Connect owner wallet</h2>
+    <p>Connect the wallet that will own the check-in contract. The page switches it to BNB Smart Chain automatically. The connected wallet becomes <b>owner</b> at deployment: its only power is pausing new check-ins — it can <b>never</b> withdraw from the pool (see step 03).</p>
+    <div class="row"><button id="connectBtn" class="accent">Connect wallet</button><span class="status" id="connectStatus">Not connected.</span></div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2>02 — Deploy AgentDrawCheckIn</h2>
+    <p>Deploys the free check-in companion. The only constructor argument is the <b>Binance Agent ID registry</b> (the SPACE ID .ai NFT) — it is prefilled with the mainnet registry. The economics are constants in the code and can never change: one check-in per wallet per UTC day = 1 point; <b>100 points = exactly 0.0005 BNB</b> (one AgentDraw ticket's price), paid by <span class="mono">redeem()</span> from the pool.</p>
+    <label for="registryInput">Agent ID registry (constructor argument)</label>
+    <input type="text" id="registryInput" value="0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F" spellcheck="false">
+    <div class="warn" id="registryWarn">⚠️ This is NOT the official Binance Agent ID registry (0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F). Double-check before deploying — a wrong registry means the check-in gate checks the wrong NFT, and the constructor argument cannot be changed afterwards.</div>
+    <div class="row" style="margin-top:14px"><button id="deployBtn" class="accent" disabled>Deploy AgentDrawCheckIn</button><span class="status" id="deployStatus">Waiting for a wallet connection.</span></div>
+    <dl class="kv" id="contractKv" style="display:none">
+      <dt>Contract</dt><dd class="mono" id="kvContract">—</dd>
+      <dt>Registry (agentId)</dt><dd class="mono" id="kvRegistry">—</dd>
+      <dt>Owner</dt><dd class="mono" id="kvOwner">—</dd>
+      <dt>POINTS_PER_PAYOUT()</dt><dd id="kvPoints">—</dd>
+      <dt>PAYOUT_WEI()</dt><dd id="kvPayout">—</dd>
+      <dt>paused() — check-ins</dt><dd id="kvPaused">—</dd>
+    </dl>
+  </section>
+
+  <section class="step" id="step3">
+    <h2>03 — Fund the redemption pool</h2>
+    <div class="warnbox"><b>⚠️ Read before funding — this money is locked.</b> BNB sent into this contract can <b>only</b> ever leave as player redemptions (0.0005 BNB per 100 points). The contract has <b>no owner withdrawal</b> — not for you, not for anyone, not ever. Fund only what you are happy to give away to players, and <b>start small</b>.</div>
+    <p>Each 0.0005 BNB funds exactly one redemption. The suggested starting amount below (0.005 BNB) funds 10 redemptions — remember a redemption needs 100 daily check-ins, so payouts are naturally slow. Anyone can fund the pool, at any time, in any amount, via the same <span class="mono">fund()</span> call.</p>
+    <label for="fundInput">Amount to fund (BNB)</label>
+    <input type="text" id="fundInput" value="0.005" spellcheck="false">
+    <div class="row" style="margin-top:14px"><button id="fundBtn" class="accent" disabled>Fund the pool — fund()</button><span class="status" id="fundStatus"></span></div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2>04 — Pause / unpause check-ins</h2>
+    <p>Emergency brake for <b>new check-ins only</b>. <span class="mono">redeem()</span> is never pausable: points players have already earned stay cashable in both states, and the pool can still be funded while paused.</p>
+    <div class="row"><button id="pauseBtn" class="danger" disabled>Pause check-ins</button><button id="unpauseBtn" disabled>Unpause check-ins</button><span class="status" id="pauseStatus"></span></div>
+  </section>
+
+  <section class="step" id="step5">
+    <h2>05 — Pool state + summary</h2>
+    <p>Live state of the check-in pool, then copy the summary box and send it to Muse to wire the check-in section into the public site and the ClawHub skill.</p>
+    <dl class="kv">
+      <dt>Pool balance</dt><dd id="kvPool">—</dd>
+      <dt>Total check-ins</dt><dd id="kvTotal">—</dd>
+      <dt>Check-ins today</dt><dd id="kvToday">—</dd>
+    </dl>
+    <div class="row" style="margin:12px 0"><button id="refreshBtn" disabled>Refresh state</button><span class="status" id="stateStatus"></span></div>
+    <label for="summaryBox">AgentDrawCheckIn deployment summary — send this to Muse</label>
+    <textarea id="summaryBox" readonly>Connect the owner wallet and deploy (step 02) — the summary fills itself in here.</textarea>
+    <div class="row" style="margin-top:10px"><button id="copySummaryBtn">Copy summary</button></div>
+  </section>
+
+  <footer>
+    Tool page for the project owner. Bytecode and ABI embedded below are generated from the compiled build artifacts
+    (contracts/AgentDrawCheckIn.sol, solc 0.8.26, paris + viaIR, optimizer 200 runs) and verified byte-identical at build time.
+    Deploying and funding spend real BNB from the connected wallet — Muse never signs anything.
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+const EXPECTED_REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
+const CHAIN_ID = 56, CHAIN_HEX = "0x38";
+const CREATION_HEX = "0x60a03460b857601f61094938819003918201601f19168301916001600160401b0383118484101760bd5780849260209460405283398101031260b857516001600160a01b03811680820360b85760005490156084576001600160a81b031916331760005560805260405161087590816100d4823960805181818160e501526107ca0152f35b60405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606490fd5b600080fd5b634e487b7160e01b600052604160045260246000fdfe608080604052600436101561001357600080fd5b60003560e01c90816316c38b3c146106d857508063183ff0851461051f5780632bac1c5b146104fd578063393f0297146104ce578063591ff3e0146104455780635c9302c9146104245780635c975abb146103fe5780638da5cb5b146103d557806396365d44146103b9578063a563eaa31461039b578063b60d428814610361578063be040fb0146101b1578063be0c288f14610195578063c483da2214610157578063cf6a4403146101195763e84f43b7146100cf57600080fd5b34610114576000366003190112610114576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b600080fd5b34610114576020366003190112610114576004356001600160a01b038116908190036101145760005260016020526020604060002054604051908152f35b34610114576020366003190112610114576004356001600160a01b038116908190036101145760005260026020526020604060002054604051908152f35b3461011457600036600319011261011457602060405160648152f35b346101145760003660031901126101145733600052600160205260646040600020541061032a576601c6bf5263400047106102f457336000526001602052604060002080549060631982019182116102de5755604051606481526601c6bf5263400060208201527ff3a670cd3af7d64b488926880889d08a8585a138ff455227af6737339a1ec26260403392a260008080806601c6bf52634000335af13d156102d9573d67ffffffffffffffff81116102c3576040519061027c601f8201601f19166020018361077e565b8152600060203d92013e5b1561028e57005b60405162461bcd60e51b815260206004820152600d60248201526c14185e5bdd5d0819985a5b1959609a1b6044820152606490fd5b634e487b7160e01b600052604160045260246000fd5b610287565b634e487b7160e01b600052601160045260246000fd5b60405162461bcd60e51b815260206004820152600e60248201526d141bdbdb081d1bdbc81cdb585b1b60921b6044820152606490fd5b60405162461bcd60e51b815260206004820152600f60248201526e4e6565642031303020706f696e747360881b6044820152606490fd5b6000366003190112610114576040513481527f5af8184bef8e4b45eb9f6ed7734d04da38ced226495548f46e0c8ff8d7d9a52460203392a2005b34610114576000366003190112610114576020600554604051908152f35b3461011457600036600319011261011457602047604051908152f35b34610114576000366003190112610114576000546040516001600160a01b039091168152602090f35b3461011457600036600319011261011457602060ff60005460a01c166040519015158152f35b34610114576000366003190112610114576020620151804204604051908152f35b34610114576020366003190112610114576004356001600160a01b03811681036101145760209060ff60005460a01c1615908161049e575b8161048e575b506040519015158152f35b61049891506107a0565b82610483565b62015180420460009081526003845260408082206001600160a01b0384168352855290205460ff1615915061047d565b346101145760003660031901126101145762015180420460005260046020526020604060002054604051908152f35b346101145760003660031901126101145760206040516601c6bf526340008152f35b346101145760003660031901126101145760ff60005460a01c166106a057610546336107a0565b1561066757620151804204600081815260036020908152604080832033845290915290205460ff166106225760008181526003602090815260408083203384528252808320805460ff19166001908117909155600283528184208590559182905290912080549182019182106102de57558060005260046020526040600020805490600182018092116102de5755600554600181018091116102de576005553360005260016020526040600020546040519081527f621d62c6c0c4a0c35e883c6b27ad50ecc3093f08bfaf8aa5f58127d351feeb2160203392a3005b60405162461bcd60e51b815260206004820152601860248201527f416c726561647920636865636b656420696e20746f64617900000000000000006044820152606490fd5b60405162461bcd60e51b81526020600482015260116024820152701059d95b9d081251081c995c5d5a5c9959607a1b6044820152606490fd5b60405162461bcd60e51b815260206004820152601060248201526f10da1958dacb5a5b9cc81c185d5cd95960821b6044820152606490fd5b34610114576020366003190112610114576004359081151580920361011457600054906001600160a01b03821633036107505760ff60a01b19821660a084901b60ff60a01b16176000556040518381527f40db37ff5c0bdc2c427fbb2078c8f24afea940abac0e3c23bb4ea3bf2da2b21290602090a1005b62461bcd60e51b81526020600482015260096024820152682737ba1037bbb732b960b91b6044820152606490fd5b90601f8019910116810190811067ffffffffffffffff8211176102c357604052565b6040516370a0823160e01b81526001600160a01b03918216600482015290602090829060249082907f0000000000000000000000000000000000000000000000000000000000000000165afa90811561083357600091610801575b50151590565b90506020813d60201161082b575b8161081c6020938361077e565b810103126101145751386107fb565b3d915061080f565b6040513d6000823e3d90fdfea264697066735822122058d2b3153377ca5ecc0ca28a5a66e5fc3cd1cddc682271c2bd2c81728bbd9b7764736f6c634300081a0033";
+const CHECKIN_ABI = [{"inputs":[{"internalType":"address","name":"agentId_","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"wallet","type":"address"},{"indexed":true,"internalType":"uint256","name":"day","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"totalPoints","type":"uint256"}],"name":"CheckedIn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Funded","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"bool","name":"paused","type":"bool"}],"name":"PausedSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"wallet","type":"address"},{"indexed":false,"internalType":"uint256","name":"pointsBurned","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Redeemed","type":"event"},{"inputs":[],"name":"PAYOUT_WEI","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"POINTS_PER_PAYOUT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"agentId","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"canCheckInToday","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"checkIn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"checkInsToday","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"currentDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"fund","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"lastCheckInDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"pointsOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"redeem","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"paused_","type":"bool"}],"name":"setPaused","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"totalCheckIns","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+// Minimal read/write selectors (verified against the compiled ABI).
+const SEL = {
+  agentId: "0xe84f43b7",           // agentId()
+  pointsPerPayout: "0xbe0c288f",   // POINTS_PER_PAYOUT()
+  payoutWei: "0x2bac1c5b",         // PAYOUT_WEI()
+  paused: "0x5c975abb",            // paused()
+  poolBalance: "0x96365d44",       // poolBalance()
+  totalCheckIns: "0xa563eaa3",     // totalCheckIns()
+  checkInsToday: "0x393f0297",     // checkInsToday()
+  fund: "0xb60d4288",              // fund()
+  setPaused: "0x16c38b3c"          // setPaused(bool)
+};
+const $ = (id) => document.getElementById(id);
+function validAddress(a) { return typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a); }
+function fmtBNB(wei) {
+  const v = BigInt(wei);
+  if (v === 0n) return "0 BNB";
+  const whole = v / 1000000000000000000n;
+  const frac = (v % 1000000000000000000n).toString().padStart(18, "0").slice(0, 6).replace(/0+$/, "");
+  return (frac ? whole.toString() + "." + frac : whole.toString()) + " BNB";
+}
+let provider = null, signer = null, account = null, ciAddress = "";
+try { const saved = localStorage.getItem("agentdraw_checkin_contract"); if (validAddress(saved)) ciAddress = saved; } catch (e) { /* storage unavailable */ }
+
+async function connect() {
+  if (!window.ethereum) { $("connectStatus").textContent = "No wallet found in this browser — open this page inside MetaMask / Trust Wallet."; return; }
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  try {
+    const net = await provider.getNetwork();
+    if (net.chainId !== CHAIN_ID) {
+      try { await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] }); }
+      catch (e) {
+        await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{ chainId: CHAIN_HEX, chainName: "BNB Smart Chain Mainnet", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: ["https://bsc-dataseed.binance.org/"], blockExplorerUrls: ["https://bscscan.com"] }] });
+      }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+    }
+  } catch (e) { /* best effort — the deploy tx itself will fail on a wrong chain */ }
+  signer = provider.getSigner();
+  account = await signer.getAddress();
+  $("connectStatus").innerHTML = 'Connected: <span class="mono">' + account + '</span>';
+  $("deployBtn").disabled = false;
+  $("deployStatus").textContent = "Ready to deploy — or use steps 03–05 if the contract below is already deployed.";
+  setManageEnabled(!!ciAddress);
+  if (ciAddress) { $("deployStatus").textContent = "A saved contract address was found — state loaded below. Deploy again only for a fresh contract."; refreshState(); }
+}
+$("connectBtn").addEventListener("click", () => connect().catch(e => { $("connectStatus").textContent = "Connection failed: " + (e.message || e); }));
+
+function checkRegistry() {
+  const v = $("registryInput").value.trim();
+  $("registryWarn").style.display = (validAddress(v) && v.toLowerCase() !== EXPECTED_REGISTRY.toLowerCase()) ? "block" : "none";
+}
+$("registryInput").addEventListener("input", checkRegistry); checkRegistry();
+
+async function readUint(addr, data) { const out = await provider.call({ to: addr, data }); return (!out || out === "0x") ? 0n : BigInt(out); }
+async function refreshState() {
+  if (!provider || !validAddress(ciAddress)) return;
+  try {
+    const reg = "0x" + (await provider.call({ to: ciAddress, data: SEL.agentId })).slice(-40);
+    const points = await readUint(ciAddress, SEL.pointsPerPayout);
+    const payout = await readUint(ciAddress, SEL.payoutWei);
+    const paused = (await readUint(ciAddress, SEL.paused)) !== 0n;
+    const pool = await readUint(ciAddress, SEL.poolBalance);
+    const total = await readUint(ciAddress, SEL.totalCheckIns);
+    const todayCount = await readUint(ciAddress, SEL.checkInsToday);
+    $("contractKv").style.display = "grid";
+    $("kvContract").innerHTML = '<a href="https://bscscan.com/address/' + ciAddress + '" target="_blank" rel="noopener">' + ciAddress + '</a>';
+    $("kvRegistry").textContent = reg;
+    $("kvOwner").textContent = account || "—";
+    $("kvPoints").textContent = points.toString() + " points per payout";
+    $("kvPayout").textContent = payout.toString() + " wei (" + fmtBNB(payout) + ")";
+    $("kvPaused").textContent = paused ? "true — check-ins paused" : "false — check-ins open";
+    $("kvPool").textContent = fmtBNB(pool) + " (" + pool.toString() + " wei) — funds " + (payout > 0n ? (pool / payout).toString() : "0") + " redemption(s)";
+    $("kvTotal").textContent = total.toString();
+    $("kvToday").textContent = todayCount.toString();
+    $("summaryBox").value =
+"AgentDrawCheckIn deployment summary — BNB Chain (chainId 56)\n" +
+"Check-in contract: " + ciAddress + "\n" +
+"Agent ID registry: " + reg + "\n" +
+"Owner: " + (account || "") + "\n" +
+"Free action: checkIn() once per wallet per UTC day, +1 point (value 0, no approval)\n" +
+"Redemption: " + points.toString() + " points = " + fmtBNB(payout) + " via redeem(), paid from the pool; pool has NO owner withdrawal\n" +
+"Pool balance: " + fmtBNB(pool) + " · total check-ins: " + total.toString() + " · check-ins today: " + todayCount.toString() + "\n" +
+"Check-ins paused: " + paused + "\n" +
+"BscScan: https://bscscan.com/address/" + ciAddress;
+  } catch (e) { $("stateStatus").textContent = "State read failed: " + (e.message || e); }
+}
+function setManageEnabled(on) {
+  ["fundBtn", "pauseBtn", "unpauseBtn", "refreshBtn"].forEach(id => { $(id).disabled = !on; });
+}
+$("deployBtn").addEventListener("click", async () => {
+  const registry = $("registryInput").value.trim();
+  if (!validAddress(registry)) { $("deployStatus").textContent = "The registry address is not a valid 0x address."; return; }
+  $("deployBtn").disabled = true;
+  $("deployStatus").textContent = "Deploying — confirm the transaction in your wallet…";
+  try {
+    const factory = new ethers.ContractFactory(CHECKIN_ABI, CREATION_HEX, signer);
+    const contract = await factory.deploy(registry);
+    $("deployStatus").textContent = "Transaction sent: " + contract.deployTransaction.hash + " — waiting for confirmation…";
+    await contract.deployed();
+    ciAddress = contract.address;
+    try { localStorage.setItem("agentdraw_checkin_contract", ciAddress); } catch (e) { /* storage unavailable */ }
+    $("deployStatus").innerHTML = '<span class="ok">Deployed ✓</span> Contract: <span class="mono">' + ciAddress + '</span>';
+    setManageEnabled(true);
+    await refreshState();
+  } catch (e) { $("deployStatus").textContent = "Deploy failed: " + (e.message || e); }
+  $("deployBtn").disabled = false;
+});
+async function sendManage(data, value, statusId, okText) {
+  if (!signer || !validAddress(ciAddress)) return;
+  try {
+    const tx = await signer.sendTransaction({ to: ciAddress, data, value: value || 0 });
+    $(statusId).textContent = "Sent: " + tx.hash + " — waiting…";
+    await tx.wait();
+    $(statusId).innerHTML = '<span class="ok">' + okText + '</span> Tx: <span class="mono">' + tx.hash + '</span>';
+    await refreshState();
+  } catch (e) { $(statusId).textContent = "Failed: " + (e.message || e); }
+}
+$("fundBtn").addEventListener("click", () => {
+  let wei;
+  try { wei = ethers.utils.parseEther($("fundInput").value.trim()); } catch (e) { $("fundStatus").textContent = "Enter a valid BNB amount first."; return; }
+  if (!wei || wei.isZero()) { $("fundStatus").textContent = "Enter an amount above 0."; return; }
+  sendManage(SEL.fund, wei, "fundStatus", "Pool funded ✓ — remember, it can only leave as redemptions.");
+});
+$("pauseBtn").addEventListener("click", () => sendManage(SEL.setPaused + "0".padStart(63, "0") + "1", 0, "pauseStatus", "Check-ins paused ✓ (redeem still open)"));
+$("unpauseBtn").addEventListener("click", () => sendManage(SEL.setPaused + "0".padStart(64, "0"), 0, "pauseStatus", "Check-ins unpaused ✓"));
+$("refreshBtn").addEventListener("click", refreshState);
+$("copySummaryBtn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("summaryBox").value); $("copySummaryBtn").textContent = "Copied ✓"; setTimeout(() => { $("copySummaryBtn").textContent = "Copy summary"; }, 2500); }
+  catch (e) { $("summaryBox").select(); }
+});
+</script>
+</body>
+</html>
