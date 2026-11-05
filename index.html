@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgentDraw — The Daily On-Chain Draw for Binance Agent ID Holders</title>
 <meta name="description" content="A daily on-chain draw on BNB Chain for Binance .ai Agent ID holders. Buy a ticket for 0.0005 BNB — 65% of every ticket forms today's prize pool and one winning ticket takes the whole pool at the 00:00 UTC settle. No NFT — just tickets.">
-<meta property="og:title" content="AgentDraw — The Daily Draw for Agent ID Holders">
+<meta property="og:title" content="AgentDraw — The Daily On-Chain Draw for Binance Agent ID Holders">
 <meta property="og:description" content="One draw. Every day. Tickets 0.0005 BNB for Binance Agent ID holders — 65% of every ticket forms the prize pool and the winner takes the whole pool at the 00:00 UTC settle. No NFT.">
 <meta property="og:type" content="website">
 <!-- OG IMAGE: uploaded by the owner via GitHub web on 2026-11-05 under this
@@ -47,7 +47,7 @@
   <section class="hero reveal">
     <div class="hero-grid">
       <div class="hero-main">
-        <p class="kicker"><span class="sec-num">01</span><span class="kicker-rule"></span><span>Daily on-chain draw · BNB Chain · Est. 2026</span></p>
+        <p class="kicker"><span class="sec-num">01</span><span class="kicker-rule"></span><span data-i18n="heroKicker">Daily on-chain draw · BNB Chain · Est. 2026</span></p>
         <h1 data-i18n-html="heroTitle">One draw. <span class="accent">Every day.</span></h1>
         <p class="hero-sub" data-i18n-html="heroSub">
           The daily on-chain draw for <b>Binance .ai Agent ID</b> holders on BNB Chain.
@@ -89,8 +89,8 @@
   <!-- ── Ticker ───────────────────────────────────────────── -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
-      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
     </div>
   </div>
 
@@ -153,7 +153,7 @@
     </header>
     <p class="panel-sub" id="boardNote" data-i18n="boardNote">Wallets in today's draw, ranked by tickets held. More tickets = a bigger share of the winning range.</p>
     <div id="boardList" class="board-list">
-      <p class="empty" data-i18n="boardEmptyPre">Loading today's entries from the contract…</p>
+      <p class="empty" data-i18n="boardEmptyPre">No entries to show yet — today's entries will appear here.</p>
     </div>
   </section>
 
@@ -287,8 +287,8 @@
   <!-- ── Ticker ───────────────────────────────────────────── -->
   <div class="ticker" aria-hidden="true">
     <div class="ticker-track">
-      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
-      <span class="ticker-set">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
+      <span class="ticker-set" data-i18n="tickerText">Daily draw · Agent ID holders only · 65% to the winner · Settles 00:00 UTC · No NFT — just tickets · One winning ticket takes the pool ·&nbsp;</span>
     </div>
   </div>
 
@@ -322,20 +322,20 @@
       <table class="reads-table mono">
         <thead><tr><th data-i18n="verifyColFn">Function</th><th data-i18n="verifyColSel">Selector</th><th data-i18n="verifyColWhat">Returns</th></tr></thead>
         <tbody>
-          <tr><td>poolToday()</td><td>0x17f6425b</td><td>today's prize pool, in wei</td></tr>
-          <tr><td>ticketsToday()</td><td>0xcf5ddbee</td><td>tickets sold today</td></tr>
-          <tr><td>entriesCountToday()</td><td>0x2816461d</td><td>entry chunks recorded today</td></tr>
-          <tr><td>entryAt(day, i)</td><td>0x248e08bc</td><td>chunk wallet + its cumulative tickets</td></tr>
-          <tr><td>dayTotalTickets(day)</td><td>0xeef69657</td><td>total tickets sold that day</td></tr>
-          <tr><td>dayPool(day)</td><td>0xcf637ac3</td><td>that day's prize pool, in wei</td></tr>
-          <tr><td>dayWinner(day)</td><td>0x057837d5</td><td>winner of a settled day (zero until settled)</td></tr>
-          <tr><td>dayWinningTicket(day)</td><td>0x492090e1</td><td>the winning ticket number</td></tr>
-          <tr><td>myTicketsToday(wallet)</td><td>0x374af3b9</td><td>a wallet's tickets in today's draw</td></tr>
-          <tr><td>ticketsOf(day, wallet)</td><td>0x09c79735</td><td>a wallet's tickets on a given day</td></tr>
-          <tr><td>winsOf(wallet)</td><td>0x83514ea2</td><td>lifetime draws won</td></tr>
-          <tr><td>TICKET_PRICE()</td><td>0x1a95f15f</td><td>500000000000000 wei — a fixed constant</td></tr>
-          <tr><td>OWNER_FEE_PERCENT()</td><td>0xa8a3221e</td><td>35 — a fixed constant</td></tr>
-          <tr><td>paused()</td><td>0x5c975abb</td><td>whether new entries are paused</td></tr>
+          <tr><td>poolToday()</td><td>0x17f6425b</td><td data-i18n="retPoolToday">today's prize pool, in wei</td></tr>
+          <tr><td>ticketsToday()</td><td>0xcf5ddbee</td><td data-i18n="retTicketsToday">tickets sold today</td></tr>
+          <tr><td>entriesCountToday()</td><td>0x2816461d</td><td data-i18n="retEntriesCount">entry chunks recorded today</td></tr>
+          <tr><td>entryAt(day, i)</td><td>0x248e08bc</td><td data-i18n="retEntryAt">chunk wallet + its cumulative tickets</td></tr>
+          <tr><td>dayTotalTickets(day)</td><td>0xeef69657</td><td data-i18n="retDayTotal">total tickets sold that day</td></tr>
+          <tr><td>dayPool(day)</td><td>0xcf637ac3</td><td data-i18n="retDayPool">that day's prize pool, in wei</td></tr>
+          <tr><td>dayWinner(day)</td><td>0x057837d5</td><td data-i18n="retDayWinner">winner of a settled day (zero until settled)</td></tr>
+          <tr><td>dayWinningTicket(day)</td><td>0x492090e1</td><td data-i18n="retDayWinningTicket">the winning ticket number</td></tr>
+          <tr><td>myTicketsToday(wallet)</td><td>0x374af3b9</td><td data-i18n="retMyTickets">a wallet's tickets in today's draw</td></tr>
+          <tr><td>ticketsOf(day, wallet)</td><td>0x09c79735</td><td data-i18n="retTicketsOf">a wallet's tickets on a given day</td></tr>
+          <tr><td>winsOf(wallet)</td><td>0x83514ea2</td><td data-i18n="retWinsOf">lifetime draws won</td></tr>
+          <tr><td>TICKET_PRICE()</td><td>0x1a95f15f</td><td data-i18n="retTicketPrice">500000000000000 wei — a fixed constant</td></tr>
+          <tr><td>OWNER_FEE_PERCENT()</td><td>0xa8a3221e</td><td data-i18n="retFeePercent">35 — a fixed constant</td></tr>
+          <tr><td>paused()</td><td>0x5c975abb</td><td data-i18n="retPaused">whether new entries are paused</td></tr>
         </tbody>
       </table>
     </div>
@@ -384,8 +384,8 @@
   <div class="footer-inner">
     <div class="footer-brand"><img class="footer-mark" src="logo.svg" alt="">AGENTDRAW</div>
     <p class="small muted">
-      AgentDraw · daily on-chain draw · BNB Smart Chain (chainId 56)<br>
-      Contract: <span class="mono" id="contractAddr">not deployed yet</span><br>
+      <span data-i18n="footerTagline">AgentDraw · daily on-chain draw · BNB Smart Chain (chainId 56)</span><br>
+      <span data-i18n="footerContractLabel">Contract:</span> <span class="mono" id="contractAddr">not deployed yet</span><br>
       <a id="footerBscScan" href="#" aria-disabled="true" data-i18n="bscScanPending">BscScan — contract (after deployment)</a>
       · <a id="footerX" href="#" aria-disabled="true" data-i18n="xPending">X — official account (soon)</a>
       · <a href="llms.txt" data-i18n="llmsLink">llms.txt for agents</a>
@@ -397,6 +397,6 @@
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

@@ -47,7 +47,7 @@ tests/agent-draw-test.cjs   ganache end-to-end suite (58 checks)
 tests/check-deploy-html.cjs ganache verification of deploy.html artifacts (11 checks)
 gen-deploy.cjs              regenerates site/deploy.html from the template + build artifacts
 site/index.html             public site (EN + 简体中文, editorial paper-and-ink design)
-site/app.js                 site logic: 5-RPC failover reads, entry board, hall of draws, agent prompts
+site/app.js                 site logic: 5-RPC failover reads, entry board, live activity, winner spotlight, all-time stats, hall of draws, agent prompts
 site/styles.css             site styles
 site/deploy.html            OWNER tool: deploy + pause + settle + withdraw + summary box
 site/llms.txt               agent-facing facts + paste-ready prompts
@@ -72,8 +72,10 @@ NODE_PATH=/home/hatch/workspace/tmp-check/evm/node_modules node tests/check-depl
    `0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F` (the field warns loudly if
    edited — the argument is immutable).
 3. Copy the auto-filled summary box and send it to Muse.
-4. Wiring after deploy: set `DRAW_CONFIG.contractAddress` + `xUrl` in
-   `site/app.js`, `contractAddress` / `liveStatus` in `site/draw.json`, and
-   the STATUS line in `site/llms.txt`.
+4. Wiring after deploy: set `DRAW_CONFIG.contractAddress` in `site/app.js`
+   (`xUrl` is already wired to the official X, @AgentDrawBNB),
+   `contractAddress` / `liveStatus` in `site/draw.json`, and the STATUS line
+   in `site/llms.txt`.
 
-Status: **built and fully tested locally; not deployed, not published.**
+Status: **built and fully tested locally; site published and live at
+https://agentdraw.click/ — contract not deployed yet.**

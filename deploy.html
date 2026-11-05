@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AgentDraw — Deploy (Owner)</title>
+<title>AgentDraw — Deploy Console (Owner)</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
   :root{ --bg:#0b1210; --bg2:#101a16; --panel:#131e19; --line:#24382f; --txt:#e8f2ec; --muted:#9db8aa; --accent:#34d399; --accent2:#2dd4bf; --danger:#f87171; --ok:#34d399; --mono:"SFMono-Regular", ui-monospace, Menlo, Consolas, monospace; }
@@ -180,7 +180,7 @@ async function refreshState() {
     $("kvRegistry").textContent = reg;
     $("kvOwner").textContent = account || "—";
     $("kvPrice").textContent = price.toString() + " wei (" + fmtBNB(price) + ")";
-    $("kvFee").textContent = fee.toString() + "% — winner prize pool " + (100n - fee).toString() + "%";
+    $("kvFee").textContent = fee.toString() + "% — prize pool " + (100n - fee).toString() + "% (to the winner)";
     $("kvPaused").textContent = paused ? "true — entries paused" : "false — entries open";
     $("kvFees").textContent = fmtBNB(fees) + " (" + fees.toString() + " wei)";
     $("kvTickets").textContent = tickets.toString();
