@@ -453,10 +453,12 @@ function showToast(msg) {
 // ── RPC failover pool (pattern proven on the Pokepvp/Crown Race sites) ──
 const BSC_RPC_URLS = [
   "https://bsc-dataseed.binance.org",
+  "https://bsc-dataseed1.binance.org",
   "https://bsc-dataseed1.defibit.io",
   "https://bsc.publicnode.com",
   "https://bsc-dataseed2.binance.org",
-  "https://bsc-dataseed3.binance.org"
+  "https://bsc-dataseed3.binance.org",
+  "https://bsc-dataseed4.binance.org"
 ];
 let rpcIndex = 0;
 async function fetchRpc(url, to, data) {
@@ -470,18 +472,47 @@ async function fetchRpc(url, to, data) {
     return json.result;
   } finally { clearTimeout(timer); }
 }
+// Concurrency cap: a page load fires dozens of reads; bursting them all at
+// one endpoint trips its rate limit (HTTP 429) and every painter starves.
+// At most 4 reads are in flight at once; the rest queue in order.
+let rpcInFlight = 0;
+const rpcWaiters = [];
+function rpcAcquire() {
+  if (rpcInFlight < 4) { rpcInFlight += 1; return Promise.resolve(); }
+  return new Promise(res => rpcWaiters.push(res));
+}
+function rpcRelease() {
+  const next = rpcWaiters.shift();
+  if (next) next(); else rpcInFlight -= 1;
+}
+const rpcSleep = ms => new Promise(res => setTimeout(res, ms));
 async function ethCall(to, data) {
-  if (window.ethereum) {
-    try { return await window.ethereum.request({ method: "eth_call", params: [{ to, data }, "latest"] }); }
-    catch { /* wallet provider failed the read — fall through to the public RPC pool */ }
-  }
-  let lastError = null;
-  for (let attempt = 0; attempt < BSC_RPC_URLS.length; attempt++) {
-    const idx = (rpcIndex + attempt) % BSC_RPC_URLS.length;
-    try { const out = await fetchRpc(BSC_RPC_URLS[idx], to, data); rpcIndex = idx; return out; }
-    catch (e) { lastError = e; }
-  }
-  throw lastError || new Error("All BSC RPC endpoints failed");
+  await rpcAcquire();
+  try {
+    if (window.ethereum) {
+      try {
+        // A locked or wrong-chain wallet provider can hang an eth_call
+        // indefinitely; race it against 5s, then fall through to the pool.
+        return await Promise.race([
+          window.ethereum.request({ method: "eth_call", params: [{ to, data }, "latest"] }),
+          rpcSleep(5000).then(() => { throw new Error("wallet provider read timed out"); })
+        ]);
+      }
+      catch { /* wallet provider failed the read — fall through to the public RPC pool */ }
+    }
+    let lastError = null;
+    for (let attempt = 0; attempt < BSC_RPC_URLS.length; attempt++) {
+      const idx = (rpcIndex + attempt) % BSC_RPC_URLS.length;
+      try { const out = await fetchRpc(BSC_RPC_URLS[idx], to, data); rpcIndex = idx; return out; }
+      catch (e) {
+        lastError = e;
+        // Rate-limited: breathe before hitting the next endpoint instead of
+        // carrying the same burst (and the same 429) down the whole pool.
+        if (/429|rate/i.test(String((e && e.message) || e))) await rpcSleep(700);
+      }
+    }
+    throw lastError || new Error("All BSC RPC endpoints failed");
+  } finally { rpcRelease(); }
 }
 async function readUint(to, data) { const out = await ethCall(to, data); return (!out || out === "0x") ? 0n : BigInt(out); }
 async function readBool(to, data) { return (await readUint(to, data)) !== 0n; }
@@ -915,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
   paintQty();
   applyLang();
   paintFooter();
-  if (contractsReady()) { refreshAll(); setInterval(refreshAll, 60000); }
+  if (contractsReady()) { refreshAll(); setTimeout(refreshAll, 12000); setInterval(refreshAll, 60000); }
 });
 
 // ── Reveal on scroll (presentation only — no logic hooks) ─────
