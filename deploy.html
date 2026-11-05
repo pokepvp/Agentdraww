@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentDraw — Deploy (Owner)</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+  :root{ --bg:#0b1210; --bg2:#101a16; --panel:#131e19; --line:#24382f; --txt:#e8f2ec; --muted:#9db8aa; --accent:#34d399; --accent2:#2dd4bf; --danger:#f87171; --ok:#34d399; --mono:"SFMono-Regular", ui-monospace, Menlo, Consolas, monospace; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background:radial-gradient(900px 480px at 50% -80px, rgba(45,212,191,.12), transparent 60%), linear-gradient(180deg, var(--bg2), var(--bg)); background-color:var(--bg); color:var(--txt); }
+  .wrap{ max-width:880px; margin:0 auto; padding:34px 18px 90px; }
+  header{ display:flex; align-items:center; gap:14px; }
+  header img{ width:46px; height:46px; border-radius:12px; box-shadow:0 0 0 1px var(--line); }
+  h1{ margin:0; font-size:26px; letter-spacing:.3px; }
+  .sub{ color:var(--muted); margin:4px 0 0; font-size:14px; }
+  .step{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px; margin-top:18px; }
+  .step h2{ margin:0 0 8px; font-size:18px; }
+  .step p{ color:var(--muted); font-size:14px; line-height:1.55; margin:0 0 12px; }
+  .mono{ font-family:var(--mono); font-size:12.5px; word-break:break-all; }
+  .row{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  button{ appearance:none; border:0; border-radius:12px; padding:12px 18px; font-weight:700; font-size:15px; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#06231a; }
+  button:disabled{ opacity:.45; cursor:not-allowed; }
+  button.ghost{ background:transparent; color:var(--txt); border:1px solid var(--line); }
+  button.danger{ background:transparent; color:var(--danger); border:1px solid var(--danger); }
+  input[type=text]{ width:100%; background:#0c1512; border:1px solid var(--line); border-radius:10px; padding:11px 12px; color:var(--txt); font-family:var(--mono); font-size:13px; }
+  input[type=text]:focus{ outline:none; border-color:var(--accent2); }
+  label{ display:block; font-size:13px; color:var(--muted); margin:0 0 6px; }
+  .warn{ display:none; margin-top:10px; padding:10px 12px; border:1px solid var(--danger); border-radius:10px; color:var(--danger); font-size:13.5px; line-height:1.5; }
+  .status{ font-size:13.5px; color:var(--muted); margin-top:10px; min-height:20px; line-height:1.5; }
+  .kv{ display:grid; grid-template-columns:170px 1fr; gap:6px 14px; font-size:13.5px; margin-top:6px; }
+  .kv dt{ color:var(--muted); } .kv dd{ margin:0; }
+  textarea{ width:100%; min-height:190px; background:#0c1512; color:var(--txt); border:1px solid var(--line); border-radius:12px; padding:14px; font-family:var(--mono); font-size:12.5px; line-height:1.6; }
+  .ok{ color:var(--ok); } .bad{ color:var(--danger); }
+  footer{ color:var(--muted); font-size:12.5px; margin-top:26px; line-height:1.6; }
+  a{ color:var(--accent2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo.svg" alt="AgentDraw logo">
+    <div>
+      <h1>AgentDraw — Deploy Console (Owner)</h1>
+      <p class="sub">Daily on-chain draw for Binance Agent ID holders · BNB Smart Chain (chainId 56) · This page is the owner's tool — it is not linked from the public site.</p>
+    </div>
+  </header>
+
+  <section class="step" id="step1">
+    <h2>01 — Connect owner wallet</h2>
+    <p>Connect the wallet that will own the contract. The page switches it to BNB Smart Chain automatically. The connected wallet becomes <b>owner</b> at deployment: it collects the 35% entry fees and can pause entries.</p>
+    <div class="row"><button id="connectBtn">Connect wallet</button><span class="status" id="connectStatus">Not connected.</span></div>
+  </section>
+
+  <section class="step" id="step2">
+    <h2>02 — Deploy AgentDraw</h2>
+    <p>Deploys the draw contract. The only constructor argument is the <b>Binance Agent ID registry</b> (the SPACE ID .ai NFT) — it is prefilled with the mainnet registry. The ticket price (0.0005 BNB) and the 65/35 split are constants in the code and can never change after deployment.</p>
+    <label for="registryInput">Agent ID registry (constructor argument)</label>
+    <input type="text" id="registryInput" value="0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F" spellcheck="false">
+    <div class="warn" id="registryWarn">⚠️ This is NOT the official Binance Agent ID registry (0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F). Double-check before deploying — a wrong registry means the Agent ID entry gate checks the wrong NFT, and the constructor argument cannot be changed afterwards.</div>
+    <div class="row" style="margin-top:14px"><button id="deployBtn" disabled>Deploy AgentDraw</button><span class="status" id="deployStatus">Waiting for a wallet connection.</span></div>
+    <dl class="kv" id="contractKv" style="display:none">
+      <dt>Contract</dt><dd class="mono" id="kvContract">—</dd>
+      <dt>Registry (agentId)</dt><dd class="mono" id="kvRegistry">—</dd>
+      <dt>Owner</dt><dd class="mono" id="kvOwner">—</dd>
+      <dt>TICKET_PRICE()</dt><dd id="kvPrice">—</dd>
+      <dt>OWNER_FEE_PERCENT()</dt><dd id="kvFee">—</dd>
+      <dt>paused()</dt><dd id="kvPaused">—</dd>
+    </dl>
+  </section>
+
+  <section class="step" id="step3">
+    <h2>03 — Pause / unpause entries</h2>
+    <p>Emergency brake for ticket sales only. Settling finished days and the prize pools are never affected by the pause.</p>
+    <div class="row"><button id="pauseBtn" class="danger" disabled>Pause entries</button><button id="unpauseBtn" class="ghost" disabled>Unpause entries</button><span class="status" id="pauseStatus"></span></div>
+  </section>
+
+  <section class="step" id="step4">
+    <h2>04 — Settle the oldest unsettled day</h2>
+    <p>Permissionless in principle (anyone can call it), included here for convenience. Settles one finished day per call: draws the winning ticket and pays the winner 100% of that day's prize pool. Reverts with "Day not ended" while the oldest unsettled day is still running.</p>
+    <div class="row"><button id="settleBtn" disabled>Call settleDay()</button><span class="status" id="settleStatus"></span></div>
+  </section>
+
+  <section class="step" id="step5">
+    <h2>05 — Withdraw fees + summary</h2>
+    <p>Withdraws the owner balance: the accumulated 35% entry fees (credited instantly at every entry, withdrawable at any time). Prize pools are never part of this balance and can never be withdrawn. Then copy the summary box and send it to Muse to wire the public site.</p>
+    <dl class="kv">
+      <dt>Owner balance (fees)</dt><dd id="kvFees">—</dd>
+      <dt>Tickets today</dt><dd id="kvTickets">—</dd>
+      <dt>Prize pool today</dt><dd id="kvPool">—</dd>
+    </dl>
+    <div class="row" style="margin:12px 0"><button id="withdrawBtn" disabled>Withdraw owner balance</button><button id="refreshBtn" class="ghost" disabled>Refresh state</button><span class="status" id="withdrawStatus"></span></div>
+    <label for="summaryBox">AgentDraw deployment summary — send this to Muse</label>
+    <textarea id="summaryBox" readonly>Connect the owner wallet and deploy (step 02) — the summary fills itself in here.</textarea>
+    <div class="row" style="margin-top:10px"><button id="copySummaryBtn" class="ghost">Copy summary</button></div>
+  </section>
+
+  <footer>
+    Tool page for the project owner. Bytecode and ABI embedded below are generated from the compiled build artifacts
+    (contracts/AgentDraw.sol, solc 0.8.26, paris + viaIR, optimizer 200 runs) and verified byte-identical at build time.
+    Deploying spends real BNB gas from the connected wallet — Muse never signs anything.
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+const EXPECTED_REGISTRY = "0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F";
+const CHAIN_ID = 56, CHAIN_HEX = "0x38";
+const CREATION_HEX = "0x60a0346100ea57601f610fc638819003918201601f19168301916001600160401b038311848410176100ef578084926020946040528339810103126100ea57516001600160a01b0381168082036100ea5760005490156100b6576001600160a81b03191633176000556080526000196201518042049081019081116100a057600955604051610ec090816101068239608051818181610214015261035e0152f35b634e487b7160e01b600052601160045260246000fd5b60405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606490fd5b600080fd5b634e487b7160e01b600052604160045260246000fdfe608080604052600436101561001357600080fd5b60003560e01c908163038962e014610afa57508063057837d514610ac657806309c7973514610a7357806316c38b3c146109fa57806317f6425b146109cb5780631a95f15f146109a9578063248e08bc146109615780632816461d146109325780632cdaf1e614610914578063374af3b9146108c95780633ccfd60b146107cf578063492090e1146107a35780635c9302c9146107825780635c975abb1461075c5780636ddfe3391461074057806380bc71751461072257806383514ea2146106e85780638da5cb5b146106bf578063a59f3e0c146102f3578063a8a3221e146102d7578063bedcf003146102b9578063ca624b771461029e578063cf5ddbee1461026f578063cf637ac314610243578063e84f43b7146101fe578063eef69657146101d25763f2fde38b1461014857600080fd5b346101cd5760203660031901126101cd57610161610b22565b60005490610179336001600160a01b03841614610b38565b6001600160a01b0316908115610199576001600160a01b03191617600055005b60405162461bcd60e51b815260206004820152600c60248201526b5a65726f206164647265737360a01b6044820152606490fd5b600080fd5b346101cd5760203660031901126101cd5760043560005260036020526020604060002054604051908152f35b346101cd5760003660031901126101cd576040517f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03168152602090f35b346101cd5760203660031901126101cd5760043560005260046020526020604060002054604051908152f35b346101cd5760003660031901126101cd5762015180420460005260036020526020604060002054604051908152f35b346101cd5760003660031901126101cd576102b7610c11565b005b346101cd5760003660031901126101cd576020600a54604051908152f35b346101cd5760003660031901126101cd57602060405160238152f35b60203660031901126101cd5760043560ff60005460a01c166106895760018110158061067e575b15610639576601c6bf5263400081028181046601c6bf5263400014821517156105675734036105f4576040516370a0823160e01b81523360048201526020816024817f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03165afa9081156105e8576000916105b6575b501561057d57602334023481046023143415171561056757606490049081340391348311610567576103cb90600a54610c04565b600a55620151804204918260005260036020526103ed82604060002054610c04565b90836000526003602052816040600020558360005260046020526104176040600020918254610c04565b9055826000526002602052604060002060018060a01b0333166000526020526040600020610446838254610c04565b905561045482600854610c04565b6008558260005260016020526040600020604051906040820182811067ffffffffffffffff8211176105515760405233825260208201928352805468010000000000000000811015610551576104af91600182018155610b70565b92909261053b57905182546001600160a01b0319166001600160a01b0391909116178255516001919091015560008281526002602090815260408083203380855290835281842054868552600484529382902054825195865292850193909352830152907f10c59f3cddf004f5818f1b2686e0989916941d9892d1dff705ea5794a5a5b33f90606090a3005b634e487b7160e01b600052600060045260246000fd5b634e487b7160e01b600052604160045260246000fd5b634e487b7160e01b600052601160045260246000fd5b60405162461bcd60e51b81526020600482015260116024820152701059d95b9d081251081c995c5d5a5c9959607a1b6044820152606490fd5b90506020813d6020116105e0575b816105d160209383610ba2565b810103126101cd575182610397565b3d91506105c4565b6040513d6000823e3d90fd5b60405162461bcd60e51b815260206004820152601b60248201527f4578616374207469636b657420707269636520726571756972656400000000006044820152606490fd5b60405162461bcd60e51b815260206004820152601760248201527f42757920312d3230207469636b657473207065722074780000000000000000006044820152606490fd5b50601481111561031a565b60405162461bcd60e51b815260206004820152600e60248201526d115b9d1c9a595cc81c185d5cd95960921b6044820152606490fd5b346101cd5760003660031901126101cd576000546040516001600160a01b039091168152602090f35b346101cd5760203660031901126101cd576001600160a01b03610709610b22565b1660005260076020526020604060002054604051908152f35b346101cd5760003660031901126101cd576020600954604051908152f35b346101cd5760003660031901126101cd57602060405160148152f35b346101cd5760003660031901126101cd57602060ff60005460a01c166040519015158152f35b346101cd5760003660031901126101cd576020620151804204604051908152f35b346101cd5760203660031901126101cd5760043560005260066020526020604060002054604051908152f35b346101cd5760003660031901126101cd576000546001600160a01b03166107f7338214610b38565b600a5490811561088e576000808084819482600a555af1610816610bc4565b5015610857576000546040519182526001600160a01b0316907f7084f5476618d8e60b11ef0d7d3f06914655adb8793e28ff7f018d4c76d505d590602090a2005b60405162461bcd60e51b815260206004820152600f60248201526e15da5d1a191c985dc819985a5b1959608a1b6044820152606490fd5b60405162461bcd60e51b81526020600482015260136024820152724e6f7468696e6720746f20776974686472617760681b6044820152606490fd5b346101cd5760203660031901126101cd576108e2610b22565b620151804204600052600260205260406000209060018060a01b03166000526020526020604060002054604051908152f35b346101cd5760003660031901126101cd576020600854604051908152f35b346101cd5760003660031901126101cd5762015180420460005260016020526020604060002054604051908152f35b346101cd5760403660031901126101cd576004356000526001602052604061098e60243582600020610b70565b506001808060a01b0382541691015482519182526020820152f35b346101cd5760003660031901126101cd5760206040516601c6bf526340008152f35b346101cd5760003660031901126101cd5762015180420460005260046020526020604060002054604051908152f35b346101cd5760203660031901126101cd576004358015158091036101cd576000547f40db37ff5c0bdc2c427fbb2078c8f24afea940abac0e3c23bb4ea3bf2da2b21291602091610a54336001600160a01b03831614610b38565b60ff60a01b191660a082901b60ff60a01b1617600055604051908152a1005b346101cd5760403660031901126101cd576024356001600160a01b03811681036101cd57600435600052600260205260406000209060018060a01b03166000526020526020604060002054604051908152f35b346101cd5760203660031901126101cd576004356000526005602052602060018060a01b0360406000205416604051908152f35b346101cd5760203660031901126101cd57602090600435600052600182526040600020548152f35b600435906001600160a01b03821682036101cd57565b15610b3f57565b60405162461bcd60e51b81526020600482015260096024820152682737ba1037bbb732b960b91b6044820152606490fd5b8054821015610b8c5760005260206000209060011b0190600090565b634e487b7160e01b600052603260045260246000fd5b90601f8019910116810190811067ffffffffffffffff82111761055157604052565b3d15610bff573d9067ffffffffffffffff82116105515760405191610bf3601f8201601f191660200184610ba2565b82523d6000602084013e565b606090565b9190820180921161056757565b6009546001810180911161056757620151804204811015610e555780600955806000526004602052604060002054908060005260036020526040600020548015808015610e4d575b610e1657600019430143811161056757604051602081019185835284604083015240606082015260608152610c8f608082610ba2565b51902090610e005706916001830180931161056757600082815260016020526040812080546000198101908111610dec575b808310610db0575090610cd391610b70565b5054600083815260056020908152604080832080546001600160a01b0319166001600160a01b0395909516948517905560068252808320879055838352600790915290208054600181019391929084106105675780600096957f8223258d09be5437dc584df7897152b861e9bfb7d741a58ce57d6d08024503836040899889988998558151908152866020820152a35af1610d6c610bc4565b5015610d7457565b60405162461bcd60e51b8152602060048201526014602482015273141c9a5e99481c185e5b595b9d0819985a5b195960621b6044820152606490fd5b610dba8184610c04565b60011c90866001610dcb8486610b70565b50015410610dd95750610cc1565b9250600181018091116105675791610cc1565b634e487b7160e01b83526011600452602483fd5b634e487b7160e01b600052601260045260246000fd5b5050600091507f8223258d09be5437dc584df7897152b861e9bfb7d741a58ce57d6d080245038360408051848152846020820152a3565b508315610c59565b60405162461bcd60e51b815260206004820152600d60248201526c11185e481b9bdd08195b991959609a1b6044820152606490fdfea2646970667358221220a9d60a2b2e271db8bdacc46f781b90ea20b651bbbcae9439f7113fd69e183d2b64736f6c634300081a0033";
+const AGENTDRAW_ABI = [{"inputs":[{"internalType":"address","name":"agentId_","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"day","type":"uint256"},{"indexed":true,"internalType":"address","name":"winner","type":"address"},{"indexed":false,"internalType":"uint256","name":"winningTicket","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"prize","type":"uint256"}],"name":"DaySettled","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"wallet","type":"address"},{"indexed":true,"internalType":"uint256","name":"day","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"tickets","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"walletTicketsToday","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"prizePoolToday","type":"uint256"}],"name":"Entered","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"bool","name":"paused","type":"bool"}],"name":"PausedSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Withdrawn","type":"event"},{"inputs":[],"name":"MAX_TICKETS_PER_TX","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"OWNER_FEE_PERCENT","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TICKET_PRICE","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"agentId","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"currentDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"day","type":"uint256"}],"name":"dayEntriesCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"dayPool","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"dayTotalTickets","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"dayWinner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"dayWinningTicket","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"n","type":"uint256"}],"name":"enter","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"entriesCountToday","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"day","type":"uint256"},{"internalType":"uint256","name":"index","type":"uint256"}],"name":"entryAt","outputs":[{"internalType":"address","name":"wallet","type":"address"},{"internalType":"uint256","name":"cumulative","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"lastSettledDay","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"wallet","type":"address"}],"name":"myTicketsToday","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ownerBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"poolToday","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bool","name":"paused_","type":"bool"}],"name":"setPaused","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"settleDay","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"ticketsOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"ticketsToday","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalTicketsAllTime","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"winsOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+// Minimal read selectors (verified against the compiled ABI).
+const SEL = {
+  ticketPrice: "0x1a95f15f",  // TICKET_PRICE()
+  feePercent: "0xa8a3221e",   // OWNER_FEE_PERCENT()
+  agentId: "0xe84f43b7",      // agentId()
+  poolToday: "0x17f6425b",    // poolToday()
+  ticketsToday: "0xcf5ddbee", // ticketsToday()
+  ownerBalance: "0xbedcf003", // ownerBalance()
+  paused: "0x5c975abb",       // paused()
+  settleDay: "0xca624b77",    // settleDay()
+  withdraw: "0x3ccfd60b",     // withdraw()
+  setPaused: "0x16c38b3c"     // setPaused(bool)
+};
+const $ = (id) => document.getElementById(id);
+function validAddress(a) { return typeof a === "string" && /^0x[0-9a-fA-F]{40}$/.test(a); }
+function fmtBNB(wei) {
+  const v = BigInt(wei);
+  if (v === 0n) return "0 BNB";
+  const whole = v / 1000000000000000000n;
+  const frac = (v % 1000000000000000000n).toString().padStart(18, "0").slice(0, 6).replace(/0+$/, "");
+  return (frac ? whole.toString() + "." + frac : whole.toString()) + " BNB";
+}
+let provider = null, signer = null, account = null, drawAddress = "";
+try { const saved = localStorage.getItem("agentdraw_contract"); if (validAddress(saved)) drawAddress = saved; } catch (e) { /* storage unavailable */ }
+
+async function connect() {
+  if (!window.ethereum) { $("connectStatus").textContent = "No wallet found in this browser — open this page inside MetaMask / Trust Wallet."; return; }
+  provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  try {
+    const net = await provider.getNetwork();
+    if (net.chainId !== CHAIN_ID) {
+      try { await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] }); }
+      catch (e) {
+        await window.ethereum.request({ method: "wallet_addEthereumChain", params: [{ chainId: CHAIN_HEX, chainName: "BNB Smart Chain Mainnet", nativeCurrency: { name: "BNB", symbol: "BNB", decimals: 18 }, rpcUrls: ["https://bsc-dataseed.binance.org/"], blockExplorerUrls: ["https://bscscan.com"] }] });
+      }
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+    }
+  } catch (e) { /* best effort — the deploy tx itself will fail on a wrong chain */ }
+  signer = provider.getSigner();
+  account = await signer.getAddress();
+  $("connectStatus").innerHTML = 'Connected: <span class="mono">' + account + '</span>';
+  $("deployBtn").disabled = false;
+  $("deployStatus").textContent = "Ready to deploy — or use steps 03–05 if the contract below is already deployed.";
+  setManageEnabled(!!drawAddress);
+  if (drawAddress) { $("deployStatus").textContent = "A saved contract address was found — state loaded below. Deploy again only for a fresh contract."; refreshState(); }
+}
+$("connectBtn").addEventListener("click", () => connect().catch(e => { $("connectStatus").textContent = "Connection failed: " + (e.message || e); }));
+
+function checkRegistry() {
+  const v = $("registryInput").value.trim();
+  $("registryWarn").style.display = (validAddress(v) && v.toLowerCase() !== EXPECTED_REGISTRY.toLowerCase()) ? "block" : "none";
+}
+$("registryInput").addEventListener("input", checkRegistry); checkRegistry();
+
+async function readUint(addr, data) { const out = await provider.call({ to: addr, data }); return (!out || out === "0x") ? 0n : BigInt(out); }
+async function refreshState() {
+  if (!provider || !validAddress(drawAddress)) return;
+  try {
+    const reg = "0x" + (await provider.call({ to: drawAddress, data: SEL.agentId })).slice(-40);
+    const price = await readUint(drawAddress, SEL.ticketPrice);
+    const fee = await readUint(drawAddress, SEL.feePercent);
+    const paused = (await readUint(drawAddress, SEL.paused)) !== 0n;
+    const fees = await readUint(drawAddress, SEL.ownerBalance);
+    const tickets = await readUint(drawAddress, SEL.ticketsToday);
+    const pool = await readUint(drawAddress, SEL.poolToday);
+    $("contractKv").style.display = "grid";
+    $("kvContract").innerHTML = '<a href="https://bscscan.com/address/' + drawAddress + '" target="_blank" rel="noopener">' + drawAddress + '</a>';
+    $("kvRegistry").textContent = reg;
+    $("kvOwner").textContent = account || "—";
+    $("kvPrice").textContent = price.toString() + " wei (" + fmtBNB(price) + ")";
+    $("kvFee").textContent = fee.toString() + "% — winner prize pool " + (100n - fee).toString() + "%";
+    $("kvPaused").textContent = paused ? "true — entries paused" : "false — entries open";
+    $("kvFees").textContent = fmtBNB(fees) + " (" + fees.toString() + " wei)";
+    $("kvTickets").textContent = tickets.toString();
+    $("kvPool").textContent = fmtBNB(pool);
+    $("summaryBox").value =
+"AgentDraw deployment summary — BNB Chain (chainId 56)\n" +
+"Contract: " + drawAddress + "\n" +
+"Agent ID registry: " + reg + "\n" +
+"Owner: " + (account || "") + "\n" +
+"Ticket price: " + fmtBNB(price) + " (constant) · split: prize pool " + (100n - fee).toString() + "% / owner fee " + fee.toString() + "% (fee credited at entry)\n" +
+"Paused: " + paused + "\n" +
+"Tickets today: " + tickets.toString() + " · prize pool today: " + fmtBNB(pool) + " · owner fee balance: " + fmtBNB(fees) + "\n" +
+"BscScan: https://bscscan.com/address/" + drawAddress;
+  } catch (e) { $("withdrawStatus").textContent = "State read failed: " + (e.message || e); }
+}
+function setManageEnabled(on) {
+  ["pauseBtn", "unpauseBtn", "settleBtn", "withdrawBtn", "refreshBtn"].forEach(id => { $(id).disabled = !on; });
+}
+$("deployBtn").addEventListener("click", async () => {
+  const registry = $("registryInput").value.trim();
+  if (!validAddress(registry)) { $("deployStatus").textContent = "The registry address is not a valid 0x address."; return; }
+  $("deployBtn").disabled = true;
+  $("deployStatus").textContent = "Deploying — confirm the transaction in your wallet…";
+  try {
+    const factory = new ethers.ContractFactory(AGENTDRAW_ABI, CREATION_HEX, signer);
+    const contract = await factory.deploy(registry);
+    $("deployStatus").textContent = "Transaction sent: " + contract.deployTransaction.hash + " — waiting for confirmation…";
+    await contract.deployed();
+    drawAddress = contract.address;
+    try { localStorage.setItem("agentdraw_contract", drawAddress); } catch (e) { /* storage unavailable */ }
+    $("deployStatus").innerHTML = '<span class="ok">Deployed ✓</span> Contract: <span class="mono">' + drawAddress + '</span>';
+    setManageEnabled(true);
+    await refreshState();
+  } catch (e) { $("deployStatus").textContent = "Deploy failed: " + (e.message || e); }
+  $("deployBtn").disabled = false;
+});
+async function sendManage(data, statusId, okText) {
+  if (!signer || !validAddress(drawAddress)) return;
+  try {
+    const tx = await signer.sendTransaction({ to: drawAddress, data });
+    $(statusId).textContent = "Sent: " + tx.hash + " — waiting…";
+    await tx.wait();
+    $(statusId).innerHTML = '<span class="ok">' + okText + '</span> Tx: <span class="mono">' + tx.hash + '</span>';
+    await refreshState();
+  } catch (e) { $(statusId).textContent = "Failed: " + (e.message || e); }
+}
+$("pauseBtn").addEventListener("click", () => sendManage(SEL.setPaused + "0".padStart(63, "0") + "1", "pauseStatus", "Entries paused ✓"));
+$("unpauseBtn").addEventListener("click", () => sendManage(SEL.setPaused + "0".padStart(64, "0"), "pauseStatus", "Entries unpaused ✓"));
+$("settleBtn").addEventListener("click", () => sendManage(SEL.settleDay, "settleStatus", "Day settled ✓"));
+$("withdrawBtn").addEventListener("click", () => sendManage(SEL.withdraw, "withdrawStatus", "Fees withdrawn ✓"));
+$("refreshBtn").addEventListener("click", refreshState);
+$("copySummaryBtn").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("summaryBox").value); $("copySummaryBtn").textContent = "Copied ✓"; setTimeout(() => { $("copySummaryBtn").textContent = "Copy summary"; }, 2500); }
+  catch (e) { $("summaryBox").select(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+# AgentDraw — daily on-chain draw for Binance Agent ID holders (BNB Chain)
+
+STATUS: CONTRACT NOT DEPLOYED YET — liveStatus "not deployed yet". Do not send
+transactions to any AgentDraw address until an official deployment address is
+published on this site. Payments sent anywhere else are lost.
+
+AgentDraw is a daily on-chain draw ("lottery") for wallets holding a Binance
+.ai Agent ID (the SPACE ID .ai NFT, registry
+0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F on BNB Chain). There is NO NFT in
+this project: players buy tickets with BNB, the tickets form a daily prize
+pool per UTC day, and one winning ticket per day is drawn on-chain.
+
+## How a day works
+1. During UTC day D, Agent ID holders buy tickets for day D's draw via
+   enter(n). After 00:00 UTC the day is finished.
+2. Anyone calls settleDay() — permissionless. It draws one winning ticket
+   from day D's entry ranges and pays its owner 100% of day D's accumulated
+   prize pool in the same transaction. Empty days settle with no winner.
+   Unsettled days are settled one per call, oldest first.
+
+## Economics — fixed in the contract, cannot be changed after deployment
+- Ticket price: exactly 0.0005 BNB per ticket = 500000000000000 wei.
+  Constant (TICKET_PRICE). 1–20 tickets per enter() call; repeat buys allowed
+  and accumulate for the same day.
+- Split (taken at entry, inside the same transaction): 65% of every ticket
+  payment forms that day's prize pool; 35% is the project fee, credited
+  instantly to the owner's withdrawable balance (owner cut per entry call =
+  msg.value * 35 / 100, remainder to the pool — always exact at the constant
+  price: 0.000175 BNB fee + 0.000325 BNB pool per ticket).
+- The prize pool (65% of every ticket) goes ENTIRELY to the winner at
+  settle — no further deduction at settle time.
+- Odds are exactly your tickets / total tickets that day.
+- Entry gate: the contract checks balanceOf(caller) > 0 on the Agent ID
+  registry on EVERY entry. Non-holders cannot enter.
+- Owner powers: pause/unpause entries, withdraw the accumulated fee balance.
+  The owner can never touch a prize pool, change the price or the split, or
+  pick a winner.
+- Randomness, honestly: the winning ticket is derived from
+  keccak256(day, totalTickets, blockhash of the block before the settle
+  transaction). It is publicly verifiable after the settle tx is mined, but
+  it is NOT VRF-grade: the settler chooses when to call and timing can
+  influence the result. Stakes are small by design.
+
+## Contract facts (canonical source once deployed: draw.json)
+- network: BNB Smart Chain Mainnet, chainId 56
+- contractAddress: null (not deployed yet)
+- agentIdRegistry: 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F
+- ticketPriceWei: 500000000000000
+- split: winnerPoolPercent 65 (paid in full at settle), ownerFeePercent 35
+  (credited instantly at entry)
+- maxTicketsPerTx: 20
+- settle: permissionless settleDay() after 00:00 UTC, one day per call
+
+## Agent prompts (paste-ready; fill the real contract address after launch)
+
+ENTER (buy tickets for today's draw; example buys 5):
+```
+Enter today's AgentDraw — BNB Chain (56).
+Contract: <CONTRACT_ADDRESS>
+Call enter(5) · selector 0xa59f3e0c · value 2500000000000000 wei (5 × 0.0005 BNB = 0.0025 BNB) · gasLimit 300000.
+Price rule: exactly 500000000000000 wei per ticket, 1–20 tickets per call. 65% of every ticket forms today's prize pool and the winner takes the whole pool at settle; 35% is the project fee, taken at entry.
+Check first (stop and name any failure): my wallet holds a Binance Agent ID (balanceOf on 0x60B9262456dE011F7d15a54CdD8c48bAaa8B022F > 0) · paused()=false.
+No approvals. Reply with the tx link only.
+```
+
+SETTLE (draw a finished day — anyone can call it, only after 00:00 UTC):
+```
+Settle the oldest unsettled AgentDraw day — BNB Chain (56). Only after 00:00 UTC.
+Contract: <CONTRACT_ADDRESS>
+Call settleDay() · selector 0xca624b77 · value 0 · gasLimit 300000. Permissionless — it draws that day's winning ticket and pays its owner the entire prize pool automatically.
+No approvals. Reply: tx link + the winner from dayWinner for the settled day.
+```
+
+## Read-only checks (eth_call, no wallet needed)
+- poolToday() 0x17f6425b — today's accumulated prize pool in wei
+- ticketsToday() 0xcf5ddbee — tickets sold today
+- myTicketsToday(address) 0x374af3b9 — your tickets in today's draw
+- entriesCountToday() 0x2816461d — number of buy transactions today
+- dayWinner(day) 0x057837d5 — settled winner of a day (0x0 = none / unsettled)
+- dayWinningTicket(day) 0x492090e1 — 1-based winning ticket index of a day
+- dayPool(day) 0xcf637ac3 — a day's prize pool in wei
+- dayTotalTickets(day) 0xeef69657 — a day's total tickets
+- winsOf(address) 0x83514ea2 — lifetime wins of a wallet
+- paused() 0x5c975abb — whether entries are paused
+
+Public RPC for reads: https://bsc-dataseed.binance.org (chainId 56).
+Site: index.html. Machine-readable facts file: draw.json.
