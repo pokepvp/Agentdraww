@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentDraw — Withdraw &amp; Redeem Daily Pool</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f4efe4;color:#1a1710;font-family:Archivo,system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:24px 14px 48px}
+  .wrap{width:100%;max-width:560px}
+  h1{font-size:28px;letter-spacing:1px;text-align:center;margin:6px 0 2px}
+  .sub{text-align:center;color:#6b6350;font-size:13px;margin-bottom:20px}
+  .card{background:#fffdf6;border:1px solid #1a1710;border-radius:12px;padding:18px 16px;margin-bottom:14px}
+  .label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#6b6350;margin-bottom:5px}
+  .value{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;word-break:break-all}
+  .big{font-size:28px;font-weight:800}
+  .row{background:#f4efe4;border:1px solid #d8d0ba;border-radius:8px;padding:10px 12px;margin-bottom:8px}
+  button{width:100%;border:1px solid #1a1710;border-radius:8px;padding:14px;font-size:16px;cursor:pointer;font-family:inherit;margin-top:8px;background:#fff}
+  button.accent{background:#ff4d00;color:#fff;border-color:#ff4d00;font-weight:800}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .msg{border-radius:8px;padding:12px;font-size:14px;line-height:1.5;margin-top:12px;display:none}
+  .msg.error{display:block;background:#ffe9e2;border:1px solid #c0392b;color:#7b1d12}
+  .msg.ok{display:block;background:#e2f5d8;border:1px solid #3f7d2c;color:#1e4d12}
+  .msg.info{display:block;background:#fff3d6;border:1px solid #b8912a;color:#5c4a00}
+  a{color:#ff4d00}
+  .note{font-size:12px;color:#6b6350;line-height:1.6;margin-top:12px}
+  .prompt{width:100%;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;padding:10px;border:1px solid #d8d0ba;border-radius:8px;background:#f4efe4;resize:vertical}
+  .warn{background:#fff3d6;border:1px solid #b8912a;border-radius:8px;padding:12px;font-size:13px;line-height:1.6;margin-bottom:14px}
+  .tx{margin-top:10px;font-size:13px;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AGENTDRAW</h1>
+  <div class="sub">Withdraw &amp; redeem — daily pool · BNB Chain (56)</div>
+
+  <div class="warn"><b>Penting — baca dulu:</b> Check-in pool <b>tidak bisa ditarik owner</b> (kontrak tidak punya fungsi withdraw owner). BNB di sana hanya bisa keluar lewat <b>redeem()</b> — 100 poin = 0,0005 BNB, oleh holder yang punya poin. Yang bisa ditarik owner hanya fee: Draw 35% + Pass Founder 0,0005 BNB/mint. Prize pool harian dibayar ke pemenang lewat <b>settleDay()</b>, bukan ke owner.</div>
+
+  <div class="card">
+    <div class="label">Your wallet</div><div class="value" id="walletAddr">Not connected</div>
+    <div class="label" style="margin-top:10px">Contract owner (Draw / Pass / Check-in — sama)</div><div class="value" id="ownerAddr">Loading…</div>
+    <button id="connectBtn">Connect Wallet</button>
+    <button id="refreshBtn">↻ Refresh live balances</button>
+    <div class="note" id="staleNote"></div>
+  </div>
+
+  <!-- 1 · REDEEM check-in pool -->
+  <div class="card">
+    <div class="label">1 · Redeem check-in pool — untuk semua holder Agent ID</div>
+    <div class="row"><div class="label">Check-in pool (live)</div><div class="value big" id="ciPool">— BNB</div></div>
+    <div class="row"><div class="label">Your points</div><div class="value big" id="ciPoints">—</div><div class="note">100 points = 0,0005 BNB. Pool sekarang cukup untuk <span id="ciRedeems">—</span> redeem.</div></div>
+    <div class="row"><div class="label">Check-in contract</div><div class="value">0xFc814Fd5a98C430aACdd78d150D157A5421b761e</div></div>
+    <button class="accent" id="redeemBtn" disabled>Redeem 100 points — 0,0005 BNB</button>
+    <div class="msg" id="redeemMsg"></div><div class="tx" id="redeemTx"></div>
+    <div class="label" style="margin-top:12px">Agent prompt — redeem</div>
+    <textarea class="prompt" rows="5" readonly id="redeemPrompt">Redeem 100 AgentDraw check-in points — BNB Chain (56).
+Check-in contract: 0xFc814Fd5a98C430aACdd78d150D157A5421b761e
+Call redeem() · selector 0xbe040fb0 · value 0 · gasLimit 200000. Pays exactly 0.0005 BNB.
+Check first: pointsOf(my wallet) &gt;= 100 · poolBalance() &gt;= 0.0005 BNB. Reply tx link only.</textarea>
+    <button data-copy="redeemPrompt">Copy redeem prompt</button>
+  </div>
+
+  <!-- 2 · OWNER WITHDRAW -->
+  <div class="card">
+    <div class="label">2 · Withdraw owner fee — owner only</div>
+    <div class="row"><div class="label">Draw owner balance (35% fee)</div><div class="value big" id="drawFee">— BNB</div><div class="value">0xFCb729e818edbe65e9831e5C49E8D32563E50574</div></div>
+    <div class="row"><div class="label">Pass owner balance (Founder 0,0005/mint)</div><div class="value big" id="passFee">— BNB</div><div class="value">0x53e43b924e016598942b857ea5B00D37Fc278dE5</div></div>
+    <div class="row"><div class="label">Total withdrawable (owner)</div><div class="value big" id="totalFee">— BNB</div></div>
+    <button class="accent" id="withdrawDrawBtn" disabled>Withdraw Draw fee — withdraw()</button>
+    <button id="withdrawPassBtn" disabled>Withdraw Pass fee — withdraw()</button>
+    <div class="msg" id="withdrawMsg"></div><div class="tx" id="withdrawTx"></div>
+    <div class="label" style="margin-top:12px">Agent prompt — withdraw Draw fee</div>
+    <textarea class="prompt" rows="4" readonly id="wdDrawPrompt">Withdraw AgentDraw owner fee — BNB Chain (56).
+Draw contract: 0xFCb729e818edbe65e9831e5C49E8D32563E50574
+Call withdraw() · selector 0x3ccfd60b · value 0 · gasLimit 200000. Owner only.
+Check first: my wallet = owner() · ownerBalance() &gt; 0. Reply tx link only.</textarea>
+    <button data-copy="wdDrawPrompt">Copy withdraw prompt</button>
+  </div>
+
+  <!-- 3 · SETTLE daily prize pool -->
+  <div class="card">
+    <div class="label">3 · Settle daily prize pool — siapa saja bisa, pemenang dibayar otomatis</div>
+    <div class="row"><div class="label">Today's prize pool</div><div class="value big" id="poolToday">— BNB</div><div class="note">Tickets today: <span id="ticketsToday">—</span> · Next unsettled day: <span id="nextDay">—</span> (pool <span id="nextPool">—</span>)</div></div>
+    <button id="settleBtn" disabled>Settle oldest unsettled day — settleDay()</button>
+    <div class="msg" id="settleMsg"></div><div class="tx" id="settleTx"></div>
+    <div class="note">Settle hanya bisa untuk hari yang sudah lewat 00:00 UTC. Kalau pool hari itu 0, settle tidak membayar apa-apa — hanya memajukan hari.</div>
+  </div>
+
+  <div class="note" style="text-align:center">Live dari chain (bukan simulasi). Halaman ini tidak pernah minta seed phrase / private key.<br>
+  <a href="https://agentdraw.click" target="_blank" rel="noopener">agentdraw.click ↗</a> ·
+  <a href="https://bscscan.com/address/0xFc814Fd5a98C430aACdd78d150D157A5421b761e" target="_blank" rel="noopener">Check-in on BscScan ↗</a></div>
+</div>
+
+<script>
+const DRAW="0xFCb729e818edbe65e9831e5C49E8D32563E50574";
+const PASS="0x53e43b924e016598942b857ea5B00D37Fc278dE5";
+const CHECK="0xFc814Fd5a98C430aACdd78d150D157A5421b761e";
+const CHAIN="0x38";
+const RPCS=["https://bsc-dataseed.binance.org","https://bsc-dataseed1.binance.org","https://bsc-dataseed2.binance.org","https://rpc.ankr.com/bsc"];
+const SEL={owner:"0x8da5cb5b",ownerBalance:"0xbedcf003",withdraw:"0x3ccfd60b",poolBalance:"0x96365d44",pointsOf:"0xcf6a4403",redeem:"0xbe040fb0",settle:"0xca624b77",poolToday:"0x17f6425b",ticketsToday:"0xcf5ddbee",currentDay:"0x5c9302c9",lastSettled:"0x80bc7175",dayPool:"0xcf637ac3"};
+let wallet=null, owner=null, ciPoolWei=null, points=null, drawFeeWei=null, passFeeWei=null, poolTodayWei=null, ticketsTodayN=null, nextDay=null, nextPoolWei=null;
+const $=id=>document.getElementById(id);
+function fmt(wei){ if(wei===null||wei===undefined) return "—"; const w=BigInt(wei); const whole=w/10n**18n; const frac=(w%10n**18n).toString().padStart(18,"0").replace(/0+$/,""); return whole.toString()+(frac?"."+frac:"")+" BNB"; }
+function show(el,text,kind){ const m=$(el); m.textContent=text; m.className="msg "+kind; }
+function clear(el){ const m=$(el); m.textContent=""; m.className="msg"; }
+async function rpcCall(method,params){
+  let lastErr=null;
+  for(const rpc of RPCS){
+    try{ const r=await fetch(rpc,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:1,method,params})});
+      const j=await r.json(); if(j.error) throw new Error(j.error.message); return j.result;
+    }catch(e){ lastErr=e; }
+  }
+  throw lastErr||new Error("All RPCs failed");
+}
+async function ethCall(to,data){
+  if(window.ethereum && wallet){
+    try{ return await window.ethereum.request({method:"eth_call",params:[{to,data},"latest"]}); }catch(e){}
+  }
+  return await rpcCall("eth_call",[{to,data},"latest"]);
+}
+function padAddr(a){ return "0x"+"0".repeat(24)+a.slice(2).toLowerCase(); }
+function padUint(n){ return "0x"+BigInt(n).toString(16).padStart(64,"0"); }
+
+async function refresh(){
+  $("staleNote").textContent="";
+  try{
+    const o=await ethCall(DRAW,SEL.owner); owner="0x"+o.slice(-40); $("ownerAddr").textContent=owner;
+    const p=await ethCall(CHECK,SEL.poolBalance); ciPoolWei=BigInt(p); $("ciPool").textContent=fmt(ciPoolWei);
+    $("ciRedeems").textContent = ciPoolWei!==null ? (ciPoolWei/500000000000000n).toString()+"×" : "—";
+    const d=await ethCall(DRAW,SEL.ownerBalance); drawFeeWei=BigInt(d); $("drawFee").textContent=fmt(drawFeeWei);
+    const pf=await ethCall(PASS,SEL.ownerBalance); passFeeWei=BigInt(pf); $("passFee").textContent=fmt(passFeeWei);
+    $("totalFee").textContent = (drawFeeWei!==null&&passFeeWei!==null)? fmt(drawFeeWei+passFeeWei) : "—";
+    const pt=await ethCall(DRAW,SEL.poolToday); poolTodayWei=BigInt(pt); $("poolToday").textContent=fmt(poolTodayWei);
+    const tt=await ethCall(DRAW,SEL.ticketsToday); ticketsTodayN=Number(BigInt(tt)); $("ticketsToday").textContent=ticketsTodayN;
+    const ls=await ethCall(DRAW,SEL.lastSettled); nextDay=Number(BigInt(ls))+1; $("nextDay").textContent=nextDay;
+    const np=await ethCall(DRAW,SEL.dayPool+padUint(nextDay).slice(2)); nextPoolWei=BigInt(np); $("nextPool").textContent=fmt(nextPoolWei);
+    if(wallet){
+      const pts=await ethCall(CHECK,SEL.pointsOf+padAddr(wallet).slice(2)); points=Number(BigInt(pts)); $("ciPoints").textContent=points;
+    }
+  }catch(e){ $("staleNote").textContent="Live read gagal sebagian — angka di atas adalah nilai terakhir yang berhasil dibaca, bukan 0. Coba Refresh."; }
+  updateState();
+}
+function isOwner(){ return wallet&&owner&&wallet.toLowerCase()===owner.toLowerCase(); }
+function updateState(){
+  // redeem
+  const rb=$("redeemBtn");
+  if(!wallet){ rb.disabled=true; rb.textContent="Redeem 100 points — connect wallet dulu"; }
+  else if(points===null){ rb.disabled=true; rb.textContent="Redeem 100 points — loading points…"; }
+  else if(points<100){ rb.disabled=true; rb.textContent="Redeem — poin kamu "+points+"/100, belum cukup"; }
+  else if(ciPoolWei!==null && ciPoolWei<500000000000000n){ rb.disabled=true; rb.textContent="Redeem — pool kurang dari 0,0005 BNB"; }
+  else { rb.disabled=false; rb.textContent="Redeem 100 points — 0,0005 BNB"; }
+  // owner withdraw
+  const wd=$("withdrawDrawBtn"), wp=$("withdrawPassBtn");
+  if(!wallet){ wd.disabled=true; wp.disabled=true; wd.textContent="Withdraw Draw fee — connect wallet dulu"; wp.textContent="Withdraw Pass fee — connect wallet dulu"; }
+  else if(!isOwner()){ wd.disabled=true; wp.disabled=true; wd.textContent="Withdraw Draw fee — owner only"; wp.textContent="Withdraw Pass fee — owner only"; show("withdrawMsg","Wallet ini bukan owner ("+owner+"). Withdraw diblokir — tidak ada transaksi yang dikirim.","error"); }
+  else {
+    clear("withdrawMsg");
+    wd.disabled = !(drawFeeWei>0n); wd.textContent = drawFeeWei>0n ? "Withdraw Draw fee — "+fmt(drawFeeWei) : "Withdraw Draw fee — saldo 0";
+    wp.disabled = !(passFeeWei>0n); wp.textContent = passFeeWei>0n ? "Withdraw Pass fee — "+fmt(passFeeWei) : "Withdraw Pass fee — saldo 0";
+  }
+  // settle
+  const sb=$("settleBtn");
+  if(nextDay===null){ sb.disabled=true; sb.textContent="Settle — loading…"; }
+  else if(nextPoolWei===0n){ sb.disabled=false; sb.textContent="Settle day "+nextDay+" — pool 0, tidak ada pemenang (hanya majukan hari)"; }
+  else { sb.disabled=false; sb.textContent="Settle day "+nextDay+" — bayar pemenang "+fmt(nextPoolWei); }
+}
+async function ensureChain(){
+  const cid=await window.ethereum.request({method:"eth_chainId"});
+  if(cid===CHAIN) return true;
+  try{ await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:CHAIN}]}); return true; }
+  catch(e){ if(e&&e.code===4902){ await window.ethereum.request({method:"wallet_addEthereumChain",params:[{chainId:CHAIN,chainName:"BNB Smart Chain",nativeCurrency:{name:"BNB",symbol:"BNB",decimals:18},rpcUrls:RPCS,blockExplorerUrls:["https://bscscan.com"]}] }); return true; } return false; }
+}
+async function sendTx(to,data,msgEl,txEl,btn,label){
+  clear(msgEl); $(txEl).innerHTML="";
+  if(!wallet){ show(msgEl,"Connect wallet dulu.","error"); return; }
+  if(!(await ensureChain())){ show(msgEl,"Pindah ke BNB Chain (56) dulu.","error"); return; }
+  btn.disabled=true; btn.textContent="Confirm di wallet…";
+  try{
+    const hash=await window.ethereum.request({method:"eth_sendTransaction",params:[{from:wallet,to,data}]});
+    show(msgEl,"Transaksi terkirim. Menunggu konfirmasi…","info");
+    $(txEl).innerHTML='<a href="https://bscscan.com/tx/'+hash+'" target="_blank" rel="noopener">Lihat transaksi di BscScan ↗</a>';
+    let receipt=null;
+    for(let i=0;i<60&&!receipt;i++){ await new Promise(r=>setTimeout(r,3000)); try{ receipt=await rpcCall("eth_getTransactionReceipt",[hash]); }catch(e){} }
+    if(receipt&&receipt.status==="0x1") show(msgEl,"Berhasil ✓ Tx: "+hash,"ok");
+    else if(receipt) show(msgEl,"Transaksi gagal on-chain. Tx: "+hash,"error");
+    else show(msgEl,"Transaksi terkirim. Cek di BscScan. Tx: "+hash,"info");
+    await refresh();
+  }catch(e){ show(msgEl,(e&&e.code===4001)?"Transaksi ditolak di wallet.":"Gagal: "+(e.message||e),"error"); updateState(); }
+  btn.textContent=label;
+}
+$("connectBtn").onclick=async()=>{
+  if(!window.ethereum){ alert("No wallet found. Buka halaman ini di MetaMask / wallet browser."); return; }
+  try{ const a=await window.ethereum.request({method:"eth_requestAccounts"}); wallet=a[0]; $("walletAddr").textContent=wallet; $("connectBtn").textContent="Connected ✓"; if(!(await ensureChain())) return; await refresh(); }
+  catch(e){ alert("Connection rejected."); }
+};
+$("refreshBtn").onclick=refresh;
+$("redeemBtn").onclick=()=>sendTx(CHECK,SEL.redeem,"redeemMsg","redeemTx",$("redeemBtn"),"Redeem 100 points — 0,0005 BNB");
+$("withdrawDrawBtn").onclick=()=>sendTx(DRAW,SEL.withdraw,"withdrawMsg","withdrawTx",$("withdrawDrawBtn"),"Withdraw Draw fee — withdraw()");
+$("withdrawPassBtn").onclick=()=>sendTx(PASS,SEL.withdraw,"withdrawMsg","withdrawTx",$("withdrawPassBtn"),"Withdraw Pass fee — withdraw()");
+$("settleBtn").onclick=()=>sendTx(DRAW,SEL.settle,"settleMsg","settleTx",$("settleBtn"),"Settle oldest unsettled day — settleDay()");
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{ const t=$(b.dataset.copy); t.select(); try{ await navigator.clipboard.writeText(t.value); b.textContent="Copied ✓"; setTimeout(()=>b.textContent="Copy "+b.dataset.copy.replace("Prompt"," prompt"),1500); }catch(e){ document.execCommand("copy"); } });
+if(window.ethereum){
+  window.ethereum.on&&window.ethereum.on("accountsChanged",a=>{ wallet=a&&a[0]?a[0]:null; $("walletAddr").textContent=wallet||"Not connected"; $("connectBtn").textContent=wallet?"Connected ✓":"Connect Wallet"; refresh(); });
+  window.ethereum.on&&window.ethereum.on("chainChanged",()=>location.reload());
+}
+refresh();
+setInterval(refresh,30000);
+</script>
+</body>
+</html>
